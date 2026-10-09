@@ -40,6 +40,10 @@ Namespace Services
         End Function
 
         Friend Async Function LoadSessionAsync() As Task(Of Models.ProtonSession)
+            ' Breadcrumbs around the storage read: a hung startup whose last line is
+            ' this one is stalled inside the vault, not in the network.
+            Log.Info("vault: loading the stored session")
+
             Dim session As New Models.ProtonSession()
             session.AccessToken = Await LoadAsync(KeyAccessToken)
             session.RefreshToken = Await LoadAsync(KeyRefreshToken)
@@ -66,6 +70,8 @@ Namespace Services
                     session.IssuedUtc = issued.ToUniversalTime()
                 End If
             End If
+
+            Log.Info("vault: stored session loaded")
 
             Return session
         End Function
