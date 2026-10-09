@@ -1,6 +1,7 @@
 ' Minimal logging. Deliberately has no API that accepts credentials: the app must
 ' never write passwords or proofs to the device log (see the plan's Review Focus).
 Imports System.Collections.Generic
+Imports System.Globalization
 
 Namespace Services
     Friend Enum LogLevel
@@ -32,12 +33,26 @@ Namespace Services
         End Sub
 
         Private Shared Sub Write(level As LogLevel, message As String)
-            Dim line As String = DateTime.Now.ToString("[HH:mm:ss] ") & level.ToString() & ": " & message
-            System.Diagnostics.Debug.WriteLine(line)
+            ' Two renderings on purpose. The short local-time line is what the
+            ' diagnostics page shows and what a debugger shows; the file gets a precise
+            ' UTC timestamp that still means something once it is pasted into a report.
+            Dim display As String = DateTime.Now.ToString("[HH:mm:ss] ", CultureInfo.InvariantCulture) &
+                                    level.ToString() & ": " & message
+            Dim persisted As String = LogFilePolicy.FormatLine(level.ToString(), message, DateTime.UtcNow)
+
+            System.Diagnostics.Debug.WriteLine(display)
             SyncLock Gate
-                Entries.Add(line)
+                Entries.Add(display)
                 If Entries.Count > MaxEntries Then Entries.RemoveAt(0)
             End SyncLock
+
+            ' Fire and forget, and never let the file sink surface: this is the
+            ' diagnostic path, so it must not be able to take the app down.
+            Try
+                LogStore.Enqueue(persisted)
+            Catch ex As Exception
+                System.Diagnostics.Debug.WriteLine("log: could not queue a line for the file: " & ex.Message)
+            End Try
         End Sub
 
         ''' <summary>Returns a copy of the in-memory log for the diagnostics page.</summary>
