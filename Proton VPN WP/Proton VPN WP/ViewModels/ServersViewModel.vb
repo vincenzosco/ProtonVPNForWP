@@ -26,7 +26,7 @@ Namespace ViewModels
 
         Friend Property SearchText As String
             Get
-                Return _searchText
+                Return If(_searchText, String.Empty)
             End Get
             Set(value As String)
                 If SetProperty(_searchText, value, "SearchText") Then ApplyFilter()
@@ -50,7 +50,7 @@ Namespace ViewModels
 
         Friend Property Summary As String
             Get
-                Return _summary
+                Return If(_summary, String.Empty)
             End Get
             Set(value As String)
                 SetProperty(_summary, value, "Summary")

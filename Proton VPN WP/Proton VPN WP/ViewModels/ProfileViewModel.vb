@@ -36,7 +36,7 @@ Namespace ViewModels
 
         Friend Property ServerName As String
             Get
-                Return _serverName
+                Return If(_serverName, String.Empty)
             End Get
             Set(value As String)
                 SetProperty(_serverName, value, "ServerName")
@@ -45,7 +45,7 @@ Namespace ViewModels
 
         Friend Property ServerAddress As String
             Get
-                Return _serverAddress
+                Return If(_serverAddress, String.Empty)
             End Get
             Set(value As String)
                 SetProperty(_serverAddress, value, "ServerAddress")
@@ -54,7 +54,7 @@ Namespace ViewModels
 
         Friend Property LocationLine As String
             Get
-                Return _locationLine
+                Return If(_locationLine, String.Empty)
             End Get
             Set(value As String)
                 SetProperty(_locationLine, value, "LocationLine")
@@ -63,7 +63,7 @@ Namespace ViewModels
 
         Friend Property KindText As String
             Get
-                Return _kindText
+                Return If(_kindText, String.Empty)
             End Get
             Set(value As String)
                 SetProperty(_kindText, value, "KindText")
@@ -72,7 +72,7 @@ Namespace ViewModels
 
         Friend Property Username As String
             Get
-                Return _username
+                Return If(_username, String.Empty)
             End Get
             Set(value As String)
                 SetProperty(_username, value, "Username")
@@ -81,7 +81,7 @@ Namespace ViewModels
 
         Friend Property CredentialSourceLine As String
             Get
-                Return _credentialSourceLine
+                Return If(_credentialSourceLine, String.Empty)
             End Get
             Set(value As String)
                 SetProperty(_credentialSourceLine, value, "CredentialSourceLine")
@@ -125,7 +125,7 @@ Namespace ViewModels
 
         Friend Property NoticeLine As String
             Get
-                Return _notice
+                Return If(_notice, String.Empty)
             End Get
             Set(value As String)
                 SetProperty(_notice, value, "NoticeLine")
