@@ -156,6 +156,21 @@ print('\n'.join(sorted(zipfile.ZipFile(p).namelist())))"
    wants 4.5:1 contrast with the text on the dark side of the pair, which is the
    platform's own pairing (`#FFFFFFFF` field, `#FF000000` text).
 
+9. **Sign-in guard:**
+
+   ```bash
+   python tools/signin_check.py
+   ```
+
+   Expected: `sign-in guard: OK`. A press of Sign in used to leave the button --
+   and the way out of the page -- armed for the whole round trip, because `IsBusy`
+   flips inside `SignInAsync`, after the page's own pre-await `UpdateVisualState`.
+   The emulator log of 2026-10-09 19:00 shows what that cost: thirteen
+   `/auth/info` requests inside six seconds from one finger, every attempt sharing
+   the pending second-factor UID that the typed code has to continue. The check
+   fails if the view model's refusal, the page's in-flight flag, or either
+   control's disarming is removed.
+
 ## Reading the log
 
 Every session appends to `logs\app.log` inside the app's local folder, and the

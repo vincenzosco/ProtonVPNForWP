@@ -14,6 +14,12 @@ Namespace ViewModels
         Private _needsTwoFactor As Boolean
         Private _errorMessage As String
         Private _isOfflineMode As Boolean
+        ''' <summary>
+        ''' Set while an attempt is running. It is deliberately not <see cref="IsBusy"/>:
+        ''' the page clears IsBusy when it is navigated back to, which would re-arm a
+        ''' second attempt over the first one's pending state.
+        ''' </summary>
+        Private _attemptInFlight As Boolean
 
         Friend Property Username As String
             Get
@@ -65,6 +71,14 @@ Namespace ViewModels
         ''' should prompt and call again.
         ''' </summary>
         Friend Async Function SignInAsync(password As String, twoFactorCode As String) As Task(Of Boolean)
+            ' A second press must not start a second SRP exchange. Every attempt shares
+            ' the pending second-factor UID, so an overlap can answer the typed code
+            ' against the wrong exchange and fail as "Proton did not prove it knows your
+            ' password". The page also disarms its button; this is what keeps the model
+            ' honest for any other caller.
+            If _attemptInFlight Then Return False
+
+            _attemptInFlight = True
             ErrorMessage = Nothing
             IsBusy = True
             StatusMessage = "Contacting Proton…"
@@ -97,6 +111,7 @@ Namespace ViewModels
                 Return False
             Finally
                 IsBusy = False
+                _attemptInFlight = False
             End Try
         End Function
 
