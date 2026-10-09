@@ -78,11 +78,29 @@ print('\n'.join(sorted(zipfile.ZipFile(p).namelist())))"
 
 2. **Build** (above). Expected: 0 errors.
 
-3. **UI strings:**
+3. **XAML keys and bindings:**
+
+   ```bash
+   python tools/xaml_check.py
+   ```
+
+   Expected: `XAML check OK`. The XAML compilers resolve neither
+   `{StaticResource}` keys nor `{Binding}` paths, so a missing key -- which
+   throws as soon as the page loads -- or a misspelled binding path is invisible
+   to a successful build. The script fails on a missing resource key and warns
+   on a binding path that exists on none of the models or view models.
+
+4. **UI strings:**
 
    ```bash
    python tools/ocr_check.py
    ```
+
+   Reads the shipping strings back with the Windows OCR engine. It needs no
+   model download and no external binary; the dependencies are in
+   `tools/requirements.txt`. It verifies text content and legibility, **not**
+   layout: with no phone or emulator available, it renders the strings in the
+   app's colours and font rather than screenshotting a running app.
 
 ## Debugging a build with ~100 errors
 

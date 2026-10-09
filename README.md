@@ -63,8 +63,14 @@ Full instructions, including how to deploy to a device or the emulator, are in
 
 ```bash
 python tools/run_srp_harness.py     # crypto vectors: expect "VB harness vs Python reference: OK"
+python tools/xaml_check.py          # resource keys and bindings: expect "XAML check OK"
 python tools/ocr_check.py           # UI strings: expect no mismatches
 ```
+
+`xaml_check.py` exists because the XAML compilers resolve neither
+`{StaticResource}` keys nor `{Binding}` paths: a missing key throws when the page
+loads, and a misspelled binding path renders a blank control. Both slip past a
+green build.
 
 The first one compiles the *shipping* crypto sources with the desktop compiler
 and cross-checks SHA-512, bcrypt and the complete SRP-6a exchange against an

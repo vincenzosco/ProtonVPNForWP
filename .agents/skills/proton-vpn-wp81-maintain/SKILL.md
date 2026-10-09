@@ -44,7 +44,15 @@ behaviour.
    ```
    Expect exit 0 and `0` occurrences of `error BC`. Build the `.vbproj`
    directly — the solution's platform name is `Any CPU`, not `AnyCPU`.
-3. **The package** — confirm the requested artefacts really shipped:
+3. **XAML keys and bindings** — `python tools/xaml_check.py`
+   Expect `XAML check OK`. The XAML compilers resolve neither `{StaticResource}`
+   keys nor `{Binding}` paths, so a missing key (which throws when the page
+   loads) or a misspelled binding path passes a green build unnoticed. Run this
+   after touching any `.xaml` file or any bindable model/view-model property.
+4. **UI strings** — `python tools/ocr_check.py`
+   Expect `UI text verification OK`. Reads the shipping strings back with the
+   Windows OCR engine; it verifies text content and legibility, never layout.
+5. **The package** — confirm the requested artefacts really shipped:
    ```bash
    python -c "import zipfile;print('\n'.join(sorted(zipfile.ZipFile('Proton VPN WP/Proton VPN WP/AppPackages/Proton VPN WP_1.0.0.0_AnyCPU_Debug_Test/Proton VPN WP_1.0.0.0_AnyCPU_Debug.appx').namelist())))"
    ```
