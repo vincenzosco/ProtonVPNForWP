@@ -137,6 +137,25 @@ print('\n'.join(sorted(zipfile.ZipFile(p).namelist())))"
    null `StatusMessage` during navigation and the app died. The rule lives in the
    getters (`Return If(_field, String.Empty)`), not at the 49 call sites.
 
+8. **Input fields:**
+
+   ```bash
+   python tools/input_check.py
+   ```
+
+   Expected: `input fields: OK`. Two rules, both of which the device found before
+   this script existed. First, every editable `TextBox`/`PasswordBox` must be
+   *read* by its code-behind: `LoginPage` read `PasswordEntry.Password` and never
+   read `UsernameBox.Text`, so a completely filled sign-in form was rejected with
+   "Enter your Proton username and password." -- an assignment into the box is not
+   a read, which is what made the bug look handled. Second, the style of every
+   input must put black text on a white field. The WP8.1 `TextBox` template keeps
+   the app's `Foreground` and switches the *field* to the platform's edit colour
+   (white) while typing, so the near-white text this app used vanished exactly when
+   it mattered -- the field looked empty while it was being typed into. The check
+   wants 4.5:1 contrast with the text on the dark side of the pair, which is the
+   platform's own pairing (`#FFFFFFFF` field, `#FF000000` text).
+
 ## Reading the log
 
 Every session appends to `logs\app.log` inside the app's local folder, and the
