@@ -108,10 +108,13 @@ print('\n'.join(sorted(zipfile.ZipFile(p).namelist())))"
    python tools/startup_check.py
    ```
 
-   Expected: six `[PASS]` lines and `startup invariants: OK`. Three of its checks
+   Expected: ten `[PASS]` lines and `startup invariants: OK`. Three of its checks
    pin the reasons the app could not get past the splash screen: the shell's wait
    for the stored session is bounded, `RestoreAsync` awaits no API call, and the log
-   really reaches a file. Reverting any of them must make this script fail -- if it
+   really reaches a file. It also pins the two ways a session can end with no error at
+   all (a suspension, and the back press the platform turns into a close) and the fact
+   that the file sink does not resume on the UI thread -- the thread that is going away
+   at exactly that moment. Reverting any of them must make this script fail -- if it
    still passes, the guard is broken, not the code.
 
 6. **Log-file policy vectors:**

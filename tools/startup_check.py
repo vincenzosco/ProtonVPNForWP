@@ -90,6 +90,8 @@ def main() -> int:
     suspending = code_only(body_of(app_src, SIGNATURES["OnSuspending"]))
     back = code_only(body_of(main_src, SIGNATURES["OnBackPressed"]))
     store = code_only(store_src)
+    drain = code_only(body_of(store_src, "Friend Shared Async Function DrainAsync("))
+    open_file = code_only(body_of(store_src, "Private Shared Async Function OpenFileAsync("))
 
     ok = True
 
@@ -155,6 +157,16 @@ def main() -> int:
         "nothing in the log naming the step; Start and the app switcher both arrive here. "
         "Windows.UI.Xaml.Application has no OnSuspending to override (BC30284), so the "
         "handler is wired with AddHandler, as the UnhandledException handler already is.",
+    )
+
+    ok &= check(
+        "ConfigureAwait(False)" in drain and "ConfigureAwait(False)" in open_file,
+        "the log's file sink does not resume on the UI thread",
+        "Log.Write queues the line and starts the drain fire-and-forget. Without this the "
+        "drain's continuations are posted back to the UI thread -- the one thread that is "
+        "going away when the app closes -- and the last line of a session, the one that "
+        "names how it ended, is then never written. That is the missing-line shape this "
+        "plan exists to remove.",
     )
 
     ok &= check(

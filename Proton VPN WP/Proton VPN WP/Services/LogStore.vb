@@ -71,9 +71,14 @@ Namespace Services
             End SyncLock
 
             Try
-                Dim file As StorageFile = Await OpenFileAsync()
-                Await FileIO.AppendTextAsync(file, batch)
-                Await TrimIfNeededAsync(file)
+                ' ConfigureAwait(False) across the whole write path. The caller is the UI
+                ' thread and the point of a log line is often that the app is leaving, so
+                ' resuming on that thread is resuming on a thread that may already be gone
+                ' -- which is how a session's last line, the one naming how it ended, goes
+                ' missing.
+                Dim file As StorageFile = Await OpenFileAsync().ConfigureAwait(False)
+                Await FileIO.AppendTextAsync(file, batch).AsTask().ConfigureAwait(False)
+                Await TrimIfNeededAsync(file).ConfigureAwait(False)
             Catch ex As Exception
                 System.Diagnostics.Debug.WriteLine("log: could not append to the file: " & ex.Message)
             End Try
@@ -85,7 +90,7 @@ Namespace Services
                 remaining = Pending.Count > 0
                 If Not remaining Then _draining = False
             End SyncLock
-            If remaining Then Await DrainAsync()
+            If remaining Then Await DrainAsync().ConfigureAwait(False)
         End Function
 
         ''' <summary>The whole file, for the diagnostics page. Never throws.</summary>
@@ -108,9 +113,11 @@ Namespace Services
         End Function
 
         Private Shared Async Function OpenFileAsync() As Task(Of StorageFile)
+            ' WinRT operations are turned into Tasks so their continuations cannot be
+            ' posted back to the UI thread; see DrainAsync for why that matters here.
             Dim folder As StorageFolder = Await ApplicationData.Current.LocalFolder.CreateFolderAsync(
-                LogFilePolicy.FolderName, CreationCollisionOption.OpenIfExists)
-            Return Await folder.CreateFileAsync(LogFilePolicy.FileName, CreationCollisionOption.OpenIfExists)
+                LogFilePolicy.FolderName, CreationCollisionOption.OpenIfExists).AsTask().ConfigureAwait(False)
+            Return Await folder.CreateFileAsync(LogFilePolicy.FileName, CreationCollisionOption.OpenIfExists).AsTask().ConfigureAwait(False)
         End Function
 
         ''' <summary>
@@ -118,10 +125,10 @@ Namespace Services
         ''' install cannot fill the app's storage with diagnostics.
         ''' </summary>
         Private Shared Async Function TrimIfNeededAsync(file As StorageFile) As Task
-            Dim properties As BasicProperties = Await file.GetBasicPropertiesAsync()
+            Dim properties As BasicProperties = Await file.GetBasicPropertiesAsync().AsTask().ConfigureAwait(False)
             If Not LogFilePolicy.ShouldTrim(CLng(properties.Size)) Then Return
 
-            Dim text As String = Await FileIO.ReadTextAsync(file)
+            Dim text As String = Await FileIO.ReadTextAsync(file).AsTask().ConfigureAwait(False)
             Dim lines As String() = text.Split(New String() {vbCrLf}, StringSplitOptions.RemoveEmptyEntries)
             Dim keep As String() = LogFilePolicy.NewestLines(lines, LogFilePolicy.KeepCount(lines.Length))
 
@@ -130,7 +137,7 @@ Namespace Services
                 kept.Append(line)
                 kept.Append(vbCrLf)
             Next
-            Await FileIO.WriteTextAsync(file, kept.ToString())
+            Await FileIO.WriteTextAsync(file, kept.ToString()).AsTask().ConfigureAwait(False)
         End Function
 
     End Class
