@@ -1,0 +1,18 @@
+# Python dependencies for the tools/ scripts.
+# Building and shipping the app does NOT need any of these.
+#
+#   python -m pip install -r tools/requirements.txt
+
+Pillow                       # tools/make_icons.py, tools/ocr_check.py
+bcrypt                       # tools/gen_blowfish.py / srp_reference.py oracle
+
+# tools/ocr_check.py uses the OCR engine built into Windows via its WinRT
+# projection. It needs no model download and no external binary.
+winrt-runtime
+winrt-Windows.Media.Ocr
+winrt-Windows.Graphics.Imaging
+winrt-Windows.Storage
+winrt-Windows.Storage.Streams
+winrt-Windows.Foundation
+winrt-Windows.Foundation.Collections
+winrt-Windows.Globalization
