@@ -7,6 +7,22 @@ Imports Windows.UI.Xaml
 Partial Public NotInheritable Class App
     Inherits Application
 
+    ''' <summary>
+    ''' The in-flight session restore.
+    '''
+    ''' The shell has to sequence on this: choosing between the sign-in page and the
+    ''' dashboard means reading IsSignedIn, and reading it before the vault has been
+    ''' read always yields False. Previously the restore was fire-and-forget, so a
+    ''' stored session could never win.
+    ''' </summary>
+    Private Shared _sessionRestore As Task = Nothing
+
+    Friend Shared ReadOnly Property SessionRestore As Task
+        Get
+            Return _sessionRestore
+        End Get
+    End Property
+
     Public Sub New()
         InitializeComponent()
         AddHandler Me.UnhandledException, AddressOf OnUnhandledException
@@ -17,13 +33,12 @@ Partial Public NotInheritable Class App
         Window.Current.Content = root
         Window.Current.Activate()
 
-        ' Restore a previously stored session in the background; the shell reads
-        ' IsSignedIn when it decides which page to show, so this only ever upgrades
-        ' the experience, it never blocks startup.
-        RestoreSession()
+        ' Started here, awaited by the shell before it decides which page to show.
+        ' Showing the UI first keeps startup responsive.
+        _sessionRestore = RestoreSessionAsync()
     End Sub
 
-    Private Async Sub RestoreSession()
+    Private Async Function RestoreSessionAsync() As Task
         Try
             Dim session As Proton_VPN_WP.Models.ProtonSession = Await AppServices.Current.Auth.RestoreAsync()
             If session IsNot Nothing Then
@@ -33,7 +48,7 @@ Partial Public NotInheritable Class App
         Catch ex As Exception
             Log.Warn("Could not restore the stored session: " & ex.Message)
         End Try
-    End Sub
+    End Function
 
     Private Sub OnUnhandledException(sender As Object, e As UnhandledExceptionEventArgs)
         Log.Error("Unhandled exception: " & e.Message)

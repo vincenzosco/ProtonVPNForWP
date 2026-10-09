@@ -32,8 +32,20 @@ Namespace Services
         End Sub
 
         ''' <summary>
-        ''' go-srp picks `a` in [1, N-1) and rejects values below 2*bitLength. We do
-        ''' the same so the ephemeral is never degenerate.
+        ''' Picks `a` exactly as go-srp's `generateClientEphemeral` does.
+        '''
+        ''' go-srp draws `a` in [0, N-1) and accepts it only when it is strictly
+        ''' greater than `2 * bitLength` and strictly less than N-1:
+        '''
+        '''     lowerBoundNat := newNat(uint64(bitLength * 2))
+        '''     notTooSmall, _, _ := secret.Cmp(lowerBoundNat)
+        '''     if notTooSmall == 1 &amp;&amp; notTooLarge == 1 { break }
+        '''
+        ''' Note that `bitLength * 2` is a *value* (4096 for 2048-bit SRP), not a bit
+        ''' count: `New BigInteger(bitLength * 2)` below is the BigInteger constructed
+        ''' from that value, which is what the reference compares against. Treating it
+        ''' as a bit length and raising the floor to e.g. 2^16 would reject and re-draw
+        ''' secrets that go-srp accepts.
         ''' </summary>
         Friend Shared Function GenerateClientSecret(random As IRandomSource, modulus As Byte(), bitLength As Integer) As BigInteger
             Dim n As BigInteger = Crypto.SrpClient.ToNumber(modulus)
@@ -42,7 +54,7 @@ Namespace Services
 
             For attempt As Integer = 1 To 64
                 Dim candidate As BigInteger = Crypto.SrpClient.ToNumber(random.NextBytes(width))
-                If candidate >= lowerBound AndAlso candidate < n - BigInteger.One Then
+                If candidate > lowerBound AndAlso candidate < n - BigInteger.One Then
                     Return candidate
                 End If
             Next

@@ -18,6 +18,8 @@ Namespace Services
         Private Const KeyUsername As String = "sec.username"
         Private Const KeyVpnUsername As String = "sec.vpnUsername"
         Private Const KeyVpnPassword As String = "sec.vpnPassword"
+        Private Const KeyExpiresIn As String = "sec.expiresIn"
+        Private Const KeyIssuedUtc As String = "sec.issuedUtc"
 
         Private ReadOnly _values As ApplicationDataContainer
 
@@ -31,6 +33,10 @@ Namespace Services
             Await StoreAsync(KeyRefreshToken, session.RefreshToken)
             Await StoreAsync(KeyUserId, session.UserId)
             Await StoreAsync(KeyUsername, session.Username)
+            ' The lifetime is persisted too, otherwise a restored session can never
+            ' report itself expired and no refresh is ever attempted.
+            Await StoreAsync(KeyExpiresIn, session.ExpiresIn.ToString(System.Globalization.CultureInfo.InvariantCulture))
+            Await StoreAsync(KeyIssuedUtc, session.IssuedUtc.ToString("o", System.Globalization.CultureInfo.InvariantCulture))
         End Function
 
         Friend Async Function LoadSessionAsync() As Task(Of Models.ProtonSession)
@@ -39,6 +45,28 @@ Namespace Services
             session.RefreshToken = Await LoadAsync(KeyRefreshToken)
             session.UserId = Await LoadAsync(KeyUserId)
             session.Username = Await LoadAsync(KeyUsername)
+
+            Dim expiresText As String = Await LoadAsync(KeyExpiresIn)
+            Dim expires As Integer = 0
+            If Not String.IsNullOrEmpty(expiresText) Then Integer.TryParse(expiresText, expires)
+            session.ExpiresIn = expires
+
+            Dim issuedText As String = Await LoadAsync(KeyIssuedUtc)
+            If Not String.IsNullOrEmpty(issuedText) Then
+                ' Round-trip on the invariant culture. The value is written as
+                ' "2026-10-09T15:28:28.7215520Z"; the culture-sensitive overload would
+                ' read that back as local time (Kind = Local), shifting the instant by
+                ' the machine's UTC offset. HasExpired compares IssuedUtc against
+                ' DateTime.UtcNow, so the shift would postpone expiry by that many
+                ' hours and the app would keep using a dead token instead of
+                ' refreshing it. RoundtripKind keeps Kind = Utc and the true instant.
+                Dim issued As DateTime
+                If DateTime.TryParse(issuedText, System.Globalization.CultureInfo.InvariantCulture,
+                                     System.Globalization.DateTimeStyles.RoundtripKind, issued) Then
+                    session.IssuedUtc = issued.ToUniversalTime()
+                End If
+            End If
+
             Return session
         End Function
 
@@ -56,7 +84,7 @@ Namespace Services
         End Function
 
         Friend Sub Clear()
-            For Each key As String In {KeyAccessToken, KeyRefreshToken, KeyUserId, KeyUsername, KeyVpnUsername, KeyVpnPassword}
+            For Each key As String In {KeyAccessToken, KeyRefreshToken, KeyUserId, KeyUsername, KeyVpnUsername, KeyVpnPassword, KeyExpiresIn, KeyIssuedUtc}
                 _values.Values.Remove(key)
             Next
         End Sub

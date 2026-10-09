@@ -114,6 +114,26 @@
                            Style="{StaticResource ProtonCaption}"
                            Margin="0,10,0,0" />
 
+                <StackPanel x:Name="OpenVpnPanel" Visibility="Collapsed">
+                    <TextBlock Text="OPENVPN CONFIGURATION"
+                               Style="{StaticResource ProtonSectionHeader}"
+                               Margin="0,22,0,6" />
+                    <TextBlock Style="{StaticResource ProtonCaption}"
+                               TextWrapping="Wrap"
+                               Text="The built-in Windows Phone VPN client does not speak OpenVPN, so the values above cannot be entered anywhere in the system dialog. Save this configuration and open it with an OpenVPN client that supports it."
+                               AutomationProperties.Name="OpenVpnExplanation" />
+                    <TextBox x:Name="OpenVpnBox"
+                             IsReadOnly="True"
+                             AcceptsReturn="True"
+                             TextWrapping="Wrap"
+                             MaxHeight="220"
+                             Background="{StaticResource ProtonSurfaceBrush}"
+                             Foreground="{StaticResource ProtonTextBrush}"
+                             FontFamily="Consolas"
+                             Margin="0,8,0,0"
+                             AutomationProperties.Name="OpenVpnConfigText" />
+                </StackPanel>
+
                 <TextBlock Text="HOW IT WORKS"
                            Style="{StaticResource ProtonSectionHeader}"
                            Margin="0,22,0,6" />

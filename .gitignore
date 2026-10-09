@@ -19,3 +19,6 @@ tools/vb_srp_harness/*.exe
 tools/vb_srp_harness/*.pdb
 tools/vb_srp_harness/*.dll
 tools/vb_srp_harness/out/
+
+# Bug hunter artifacts
+.bug-hunter/

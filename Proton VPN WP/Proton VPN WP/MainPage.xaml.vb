@@ -10,10 +10,22 @@ Partial Public NotInheritable Class MainPage
 
     Private _unsubscribe As Action
 
-    Protected Overrides Sub OnNavigatedTo(e As NavigationEventArgs)
+    Protected Overrides Async Sub OnNavigatedTo(e As NavigationEventArgs)
         MyBase.OnNavigatedTo(e)
 
+        ' Registered before the await so an early back press is not missed.
         AddHandler HardwareButtons.BackPressed, AddressOf OnBackPressed
+
+        ' The stored session arrives asynchronously. Deciding before it lands would
+        ' always send a signed-in user back to the sign-in page.
+        Dim restore As Task = App.SessionRestore
+        If restore IsNot Nothing Then
+            Try
+                Await restore
+            Catch ex As Exception
+                Log.Warn("Session restore failed before navigation: " & ex.Message)
+            End Try
+        End If
 
         ' Start on the dashboard when a session is still on the device, otherwise sign in.
         If RootFrame.Content Is Nothing Then
