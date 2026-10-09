@@ -4,6 +4,7 @@ Imports Proton_VPN_WP.Services
 Imports Windows.ApplicationModel.Activation
 Imports Windows.UI.Xaml
 Imports Windows.UI.Xaml.Controls
+Imports Windows.UI.Xaml.Navigation
 
 Partial Public NotInheritable Class App
     Inherits Application
@@ -43,6 +44,9 @@ Partial Public NotInheritable Class App
         ' handler was the only place the hardware back button got registered.
         Dim shellHost As New Frame()
         Window.Current.Content = shellHost
+        ' A page that throws while loading raises this instead of killing the process
+        ' with nothing in the log naming it.
+        AddHandler shellHost.NavigationFailed, AddressOf OnNavigationFailed
         shellHost.Navigate(GetType(MainPage))
         Window.Current.Activate()
         Log.Info("startup: shell activated; restoring the stored session")
@@ -72,6 +76,12 @@ Partial Public NotInheritable Class App
 
     Private Sub OnUnhandledException(sender As Object, e As UnhandledExceptionEventArgs)
         Log.Error("Unhandled exception: " & e.Message)
+    End Sub
+
+    Private Sub OnNavigationFailed(sender As Object, e As NavigationFailedEventArgs)
+        ' The page's own bug stays the cause to fix; this only makes the failure
+        ' legible, which an unhandled NavigationFailed is not.
+        Log.Error("startup: navigation to " & e.SourcePageType.Name & " failed: " & e.Exception.Message)
     End Sub
 
 End Class

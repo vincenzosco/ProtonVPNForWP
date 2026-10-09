@@ -124,6 +124,19 @@ print('\n'.join(sorted(zipfile.ZipFile(p).namelist())))"
    shipping `Services/LogFilePolicy.vb` with `vbc`, the same way the crypto harness
    does, which is why that file must stay WinRT-free.
 
+7. **View-model strings:**
+
+   ```bash
+   python tools/text_check.py
+   ```
+
+   Expected: `view-model strings: OK`. WinRT rejects a null `TextBlock.Text` -- it
+   raises `ArgumentNullException` inside the HSTRING marshaller, unlike WPF and
+   Silverlight -- so a view-model string property must never hand back `Nothing`.
+   This is the check that was missing when `LoginPage.UpdateVisualState` assigned a
+   null `StatusMessage` during navigation and the app died. The rule lives in the
+   getters (`Return If(_field, String.Empty)`), not at the 49 call sites.
+
 ## Reading the log
 
 Every session appends to `logs\app.log` inside the app's local folder, and the
