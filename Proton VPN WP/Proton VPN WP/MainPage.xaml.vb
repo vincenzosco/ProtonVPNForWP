@@ -20,6 +20,10 @@ Partial Public NotInheritable Class MainPage
     Protected Overrides Async Sub OnNavigatedTo(e As NavigationEventArgs)
         MyBase.OnNavigatedTo(e)
 
+        ' The line that proves this handler ran at all: with the shell page assigned
+        ' instead of navigated to, none of the lines below ever reached the log.
+        Log.Info("startup: shell page navigated to")
+
         ' Registered before the await so an early back press is not missed.
         AddHandler HardwareButtons.BackPressed, AddressOf OnBackPressed
 

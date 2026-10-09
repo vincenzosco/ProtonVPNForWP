@@ -14,11 +14,13 @@ Usage:
 """
 from __future__ import annotations
 
+import re
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 APP = ROOT / "Proton VPN WP" / "Proton VPN WP"
+APPX = APP / "App.xaml.vb"
 MAIN = APP / "MainPage.xaml.vb"
 AUTH = APP / "Services" / "ProtonAuthService.vb"
 LOG = APP / "Services" / "Log.vb"
@@ -26,10 +28,16 @@ STORE = APP / "Services" / "LogStore.vb"
 PROJ = APP / "Proton VPN WP.vbproj"
 
 SIGNATURES = {
+    "OnLaunched": "Protected Overrides Sub OnLaunched(",
     "MainPage": "Protected Overrides Async Sub OnNavigatedTo(",
+    "WaitForRestore": "Private Shared Async Function WaitForRestoreAsync()",
     "RestoreAsync": "Friend Async Function RestoreAsync()",
     "LogWrite": "Private Shared Sub Write(",
 }
+
+# A body ends at the first line that is only an End Sub/Function, at any indent:
+# App's members sit at four spaces, MainPage's at eight.
+END_RE = re.compile(r"^\s*End (?:Sub|Function)\s*$", re.MULTILINE)
 
 
 def read(path: Path) -> str:
@@ -44,13 +52,12 @@ def code_only(text: str) -> str:
 
 
 def body_of(text: str, signature: str) -> str:
-    """Text from `signature` up to the next `End Sub`/`End Function`."""
+    """Text from `signature` up to the next line that only ends a Sub/Function."""
     start = text.find(signature)
     if start < 0:
         return ""
-    ends = [i for i in (text.find("\n        End Sub", start), text.find("\n        End Function", start)) if i > 0]
-    end = min(ends) if ends else len(text)
-    return text[start:end]
+    match = END_RE.search(text, start)
+    return text[start: match.start()] if match else text[start:]
 
 
 def check(condition: bool, label: str, detail: str = "") -> bool:
@@ -65,13 +72,16 @@ def check(condition: bool, label: str, detail: str = "") -> bool:
 
 
 def main() -> int:
+    app_src = read(APPX)
     main_src = read(MAIN)
     auth_src = read(AUTH)
     log_src = read(LOG)
     store_src = read(STORE)
     proj_src = read(PROJ)
 
+    launched = code_only(body_of(app_src, SIGNATURES["OnLaunched"]))
     shell = code_only(body_of(main_src, SIGNATURES["MainPage"]))
+    wait = code_only(body_of(main_src, SIGNATURES["WaitForRestore"]))
     restore = code_only(body_of(auth_src, SIGNATURES["RestoreAsync"]))
     write = code_only(body_of(log_src, SIGNATURES["LogWrite"]))
     store = code_only(store_src)
@@ -79,10 +89,23 @@ def main() -> int:
     ok = True
 
     ok &= check(
-        "Task.WhenAny" in shell and "Task.Delay" in shell,
+        "New Frame()" in launched
+        and "Navigate(GetType(MainPage))" in launched
+        and "Window.Current.Content = New MainPage" not in launched,
+        "the shell page is navigated to, not assigned as the root visual",
+        "Page.OnNavigatedTo is raised by the Frame that navigates. The device log of "
+        "2026-10-09 showed no line from MainPage.OnNavigatedTo at all: the handler "
+        "that fills RootFrame never ran, so the app never showed a page.",
+    )
+
+    ok &= check(
+        "Await WaitForRestoreAsync()" in shell
+        and "Task.WhenAny" in wait
+        and "Task.Delay" in wait,
         "the shell's wait for the stored session is bounded",
-        "MainPage.OnNavigatedTo must race the restore against Task.Delay(StartupBudget); "
-        "an unbounded wait is what kept the app on the splash screen.",
+        "MainPage.OnNavigatedTo must wait through WaitForRestoreAsync, which races the "
+        "restore against Task.Delay(StartupBudget). An unbounded wait is what kept the "
+        "app on the splash screen.",
     )
 
     ok &= check(
