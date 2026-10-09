@@ -22,3 +22,7 @@ tools/vb_srp_harness/out/
 
 # Bug hunter artifacts
 .bug-hunter/
+
+# Log harness build output
+tools/vb_log_harness/out/
+tools/vb_log_harness/*.exe
