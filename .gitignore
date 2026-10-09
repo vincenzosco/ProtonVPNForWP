@@ -1,0 +1,17 @@
+# Build outputs
+[Bb]in/
+[Oo]bj/
+AppPackages/
+*.suo
+*.user
+*.userprefs
+*.userosscache
+*.sln.docstates
+*.xml
+!Package.appxmanifest
+# Local scratch
+.superpowers/
+__pycache__/
+*.pyc
+tools/out/
+tools/ocr-shots/
