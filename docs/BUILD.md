@@ -102,6 +102,63 @@ print('\n'.join(sorted(zipfile.ZipFile(p).namelist())))"
    layout: with no phone or emulator available, it renders the strings in the
    app's colours and font rather than screenshotting a running app.
 
+5. **Startup invariants:**
+
+   ```bash
+   python tools/startup_check.py
+   ```
+
+   Expected: six `[PASS]` lines and `startup invariants: OK`. Three of its checks
+   pin the reasons the app could not get past the splash screen: the shell's wait
+   for the stored session is bounded, `RestoreAsync` awaits no API call, and the log
+   really reaches a file. Reverting any of them must make this script fail -- if it
+   still passes, the guard is broken, not the code.
+
+6. **Log-file policy vectors:**
+
+   ```bash
+   python tools/run_log_harness.py
+   ```
+
+   Expected: ten `[PASS]` lines and `log policy vectors: OK`. It compiles the
+   shipping `Services/LogFilePolicy.vb` with `vbc`, the same way the crypto harness
+   does, which is why that file must stay WinRT-free.
+
+## Reading the log
+
+Every session appends to `logs\app.log` inside the app's local folder, and the
+first line of the session records its own full path, so the file can be found
+without a debugger:
+
+```
+[2026-10-09T18:02:11.4820000Z] Info: startup: log file C:\Data\Users\DefApps\...\LocalState\logs\app.log
+```
+
+The startup path logs both sides of each step (`startup:`, `restore:`, `vault:`), so
+**the last line in the file names the step that stalled**. That is the whole point:
+a stall becomes legible without attaching a debugger.
+
+To retrieve it, use the SDK's Isolated Storage Explorer. Its own usage text gives
+the arguments: `ts` takes a snapshot of the isolated store to the desktop, `de`
+selects a Windows Phone connected to the desktop, `xd` the default emulator, and
+the GUID is the `PhoneProductId` in `Package.appxmanifest`.
+
+```bash
+ISET="/c/Program Files (x86)/Microsoft SDKs/Windows Phone/v8.1/Tools/IsolatedStorageExplorerTool/ISETool.exe"
+
+"$ISET" EnumerateDevices                                              # what exists right now
+"$ISET" ts de 0a59a853-0bc1-4932-a95e-3b293212e9ec .bug-hunter/device-store   # connected phone
+"$ISET" ts xd 0a59a853-0bc1-4932-a95e-3b293212e9ec .bug-hunter/device-store   # emulator
+```
+
+The snapshot is written into the path you give (the `Local` store by default), so
+the file above appears as `.bug-hunter/device-store/logs/app.log`.
+
+The file is capped at 64 KB (`LogFilePolicy.MaxBytes`); once it passes that the
+oldest half is dropped, rather than being left to grow. It never holds a
+credential: `Log` exposes no API that accepts one, and the startup lines record
+presence and lengths, never values.
+
 ## Debugging a build with ~100 errors
 
 vbc 12 stops after 100 errors and offers no `/errorlimit`, so the interesting
