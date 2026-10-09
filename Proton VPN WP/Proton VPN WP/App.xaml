@@ -32,6 +32,16 @@
             <SolidColorBrush x:Key="ProtonDangerBrush" Color="{StaticResource ProtonDangerColor}" />
             <SolidColorBrush x:Key="ProtonDividerBrush" Color="{StaticResource ProtonDividerColor}" />
 
+            <!-- Input fields (what the user types). The WP8.1 text box template keeps
+                 the app's Foreground and switches the *field* to the platform's edit
+                 colour -- white -- while the field has focus, so text on the light side
+                 of the pair disappears exactly while it is being typed. These are the
+                 platform's own values: #FFFFFFFF field, #FF000000 text. -->
+            <Color x:Key="ProtonInputBackgroundColor">#FFFFFFFF</Color>
+            <Color x:Key="ProtonInputTextColor">#FF000000</Color>
+            <SolidColorBrush x:Key="ProtonInputBackgroundBrush" Color="{StaticResource ProtonInputBackgroundColor}" />
+            <SolidColorBrush x:Key="ProtonInputTextBrush" Color="{StaticResource ProtonInputTextColor}" />
+
             <!-- Typography -->
             <Style x:Key="ProtonPageTitle" TargetType="TextBlock">
                 <Setter Property="Foreground" Value="{StaticResource ProtonTextBrush}" />
@@ -106,8 +116,8 @@
             </Style>
 
             <Style x:Key="ProtonTextBox" TargetType="TextBox">
-                <Setter Property="Background" Value="{StaticResource ProtonSurfaceBrush}" />
-                <Setter Property="Foreground" Value="{StaticResource ProtonTextBrush}" />
+                <Setter Property="Background" Value="{StaticResource ProtonInputBackgroundBrush}" />
+                <Setter Property="Foreground" Value="{StaticResource ProtonInputTextBrush}" />
                 <Setter Property="BorderThickness" Value="1" />
                 <Setter Property="BorderBrush" Value="{StaticResource ProtonDividerBrush}" />
                 <Setter Property="Padding" Value="12,10" />
@@ -116,8 +126,8 @@
             </Style>
 
             <Style x:Key="ProtonPasswordBox" TargetType="PasswordBox">
-                <Setter Property="Background" Value="{StaticResource ProtonSurfaceBrush}" />
-                <Setter Property="Foreground" Value="{StaticResource ProtonTextBrush}" />
+                <Setter Property="Background" Value="{StaticResource ProtonInputBackgroundBrush}" />
+                <Setter Property="Foreground" Value="{StaticResource ProtonInputTextBrush}" />
                 <Setter Property="BorderThickness" Value="1" />
                 <Setter Property="BorderBrush" Value="{StaticResource ProtonDividerBrush}" />
                 <Setter Property="Padding" Value="12,10" />
