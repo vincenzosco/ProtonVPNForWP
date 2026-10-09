@@ -4,6 +4,7 @@
 ' the desktop verification harness supplies a fixed value instead.
 Imports System.Numerics
 Imports Windows.Security.Cryptography
+Imports Windows.Storage.Streams
 
 Namespace Services
 
@@ -17,7 +18,10 @@ Namespace Services
 
         Friend Function NextBytes(count As Integer) As Byte() Implements IRandomSource.NextBytes
             Dim buffer As IBuffer = CryptographicBuffer.GenerateRandom(CUInt(count))
-            Return CryptographicBuffer.ToByteArray(buffer)
+            ' WP8.1's CryptographicBuffer has no ToByteArray, so copy explicitly.
+            Dim bytes(count - 1) As Byte
+            CryptographicBuffer.CopyToByteArray(buffer, bytes)
+            Return bytes
         End Function
 
     End Class

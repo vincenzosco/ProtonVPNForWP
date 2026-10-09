@@ -1,6 +1,6 @@
 ' Persists non-secret preferences in ApplicationData.LocalSettings.
 ' Secrets go to CredentialVault instead.
-Imports Models
+Imports Proton_VPN_WP.Models
 Imports Windows.Storage
 
 Namespace Services

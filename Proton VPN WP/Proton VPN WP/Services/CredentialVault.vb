@@ -6,6 +6,7 @@ Imports System.Threading.Tasks
 Imports Windows.Security.Cryptography
 Imports Windows.Security.Cryptography.DataProtection
 Imports Windows.Storage
+Imports Windows.Storage.Streams
 
 Namespace Services
     Friend NotInheritable Class CredentialVault
@@ -66,8 +67,9 @@ Namespace Services
                 Return
             End If
             Try
-                Dim protected As String = Await ProtectAsync(plain)
-                _values.Values(key) = protected
+                ' "protected" is a VB keyword, so the value needs a real name.
+                Dim protectedValue As String = Await ProtectAsync(plain)
+                _values.Values(key) = protectedValue
             Catch ex As Exception
                 Log.Warn("Could not protect a credential for storage: " & ex.Message)
             End Try

@@ -4,8 +4,8 @@
 ' The password never leaves the device; only the SRP proof does.
 Imports System.Text
 Imports System.Threading.Tasks
-Imports Crypto
-Imports Models
+Imports Proton_VPN_WP.Crypto
+Imports Proton_VPN_WP.Models
 Imports Windows.Data.Json
 
 Namespace Services

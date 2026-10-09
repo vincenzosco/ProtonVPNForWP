@@ -1,6 +1,6 @@
 ' Turns a chosen server plus Proton's OpenVPN/IKEv2 credentials into exactly the
 ' values Windows Phone's built-in VPN dialog asks for.
-Imports Models
+Imports Proton_VPN_WP.Models
 
 Namespace Services
     Friend NotInheritable Class VpnProfileBuilder

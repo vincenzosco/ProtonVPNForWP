@@ -1,13 +1,17 @@
 ' Server models mirroring the schema of Proton's `/vpn/logicals` response -- the
 ' same schema is used by the bundled offline catalogue so one parser serves both.
-Imports Services
+'
+' These types are Public on purpose: the WinRT XAML binding engine resolves bound
+' properties by reflection and cannot see Friend members, so internal visibility
+' here would silently render empty list rows.
+Imports Proton_VPN_WP.Services
 Imports Windows.Data.Json
 
 Namespace Models
 
     ''' <summary>Feature bit flags reported per logical server by Proton.</summary>
     <Flags>
-    Friend Enum ServerFeature
+    Public Enum ServerFeature
         None = 0
         SecureCore = 1
         Tor = 2
@@ -17,7 +21,7 @@ Namespace Models
         Restricted = 32
     End Enum
 
-    Friend Enum ServerStatus
+    Public Enum ServerStatus
         Down = 0
         Up = 1
         Maintenance = 2
@@ -25,7 +29,7 @@ Namespace Models
     End Enum
 
     ''' <summary>Tier the account must hold to use a server.</summary>
-    Friend Enum ServerTier
+    Public Enum ServerTier
         Free = 0
         Basic = 1
         Plus = 2
@@ -34,15 +38,15 @@ Namespace Models
     End Enum
 
     ''' <summary>A single physical entry/exit node belonging to a logical server.</summary>
-    Friend NotInheritable Class ProtonPhysicalServer
-        Friend Property Id As String
-        Friend Property EntryIp As String
-        Friend Property ExitIp As String
-        Friend Property Domain As String
-        Friend Property Label As String
-        Friend Property Status As ServerStatus = ServerStatus.Unknown
+    Public NotInheritable Class ProtonPhysicalServer
+        Public Property Id As String
+        Public Property EntryIp As String
+        Public Property ExitIp As String
+        Public Property Domain As String
+        Public Property Label As String
+        Public Property Status As ServerStatus = ServerStatus.Unknown
 
-        Friend Shared Function FromJson(obj As JsonObject) As ProtonPhysicalServer
+        Public Shared Function FromJson(obj As JsonObject) As ProtonPhysicalServer
             If obj Is Nothing Then Return Nothing
             Return New ProtonPhysicalServer With {
                 .Id = Json.TryString(obj, "ID"),
@@ -54,7 +58,7 @@ Namespace Models
             }
         End Function
 
-        Friend Shared Function ParseStatus(value As Integer) As ServerStatus
+        Public Shared Function ParseStatus(value As Integer) As ServerStatus
             Select Case value
                 Case 0 : Return ServerStatus.Down
                 Case 1 : Return ServerStatus.Up
@@ -65,21 +69,21 @@ Namespace Models
     End Class
 
     ''' <summary>A logical server ("US-NY#1") the user can pick.</summary>
-    Friend NotInheritable Class ProtonLogical
-        Friend Property Id As String
-        Friend Property Name As String
-        Friend Property Domain As String
-        Friend Property City As String
-        Friend Property Country As String
-        Friend Property CountryCode As String
-        Friend Property Status As ServerStatus = ServerStatus.Unknown
-        Friend Property Load As Integer
-        Friend Property Tier As ServerTier = ServerTier.Unknown
-        Friend Property Features As ServerFeature = ServerFeature.None
-        Friend Property Servers As New List(Of ProtonPhysicalServer)()
+    Public NotInheritable Class ProtonLogical
+        Public Property Id As String
+        Public Property Name As String
+        Public Property Domain As String
+        Public Property City As String
+        Public Property Country As String
+        Public Property CountryCode As String
+        Public Property Status As ServerStatus = ServerStatus.Unknown
+        Public Property Load As Integer
+        Public Property Tier As ServerTier = ServerTier.Unknown
+        Public Property Features As ServerFeature = ServerFeature.None
+        Public Property Servers As New List(Of ProtonPhysicalServer)()
 
         ''' <summary>Hostname used by the IKEv2/OpenVPN profile.</summary>
-        Friend ReadOnly Property HostName As String
+        Public ReadOnly Property HostName As String
             Get
                 If Not String.IsNullOrEmpty(Domain) Then Return Domain
                 For Each physical In Servers
@@ -89,13 +93,32 @@ Namespace Models
             End Get
         End Property
 
-        Friend ReadOnly Property IsAvailable As Boolean
+        Public ReadOnly Property IsAvailable As Boolean
             Get
                 Return Status = ServerStatus.Up
             End Get
         End Property
 
-        Friend ReadOnly Property FeatureText As String
+        ''' <summary>Bound in the server list template.</summary>
+        Public ReadOnly Property StatusText As String
+            Get
+                Select Case Status
+                    Case ServerStatus.Up : Return "Online"
+                    Case ServerStatus.Maintenance : Return "Maintenance"
+                    Case ServerStatus.Down : Return "Offline"
+                    Case Else : Return "Unknown"
+                End Select
+            End Get
+        End Property
+
+        ''' <summary>Bound in the server list template, e.g. "23% load".</summary>
+        Public ReadOnly Property LoadText As String
+            Get
+                Return Load.ToString() & "% load"
+            End Get
+        End Property
+
+        Public ReadOnly Property FeatureText As String
             Get
                 Dim parts As New List(Of String)()
                 If (Features And ServerFeature.SecureCore) = ServerFeature.SecureCore Then parts.Add("Secure Core")
@@ -108,7 +131,7 @@ Namespace Models
             End Get
         End Property
 
-        Friend ReadOnly Property TierText As String
+        Public ReadOnly Property TierText As String
             Get
                 Select Case Tier
                     Case ServerTier.Free : Return "Free"
@@ -121,7 +144,7 @@ Namespace Models
         End Property
 
         ''' <summary>A human readable location, e.g. "New York, United States".</summary>
-        Friend ReadOnly Property LocationText As String
+        Public ReadOnly Property LocationText As String
             Get
                 If String.IsNullOrEmpty(City) Then Return Country
                 If String.IsNullOrEmpty(Country) Then Return City
@@ -130,7 +153,7 @@ Namespace Models
             End Get
         End Property
 
-        Friend Shared Function FromJson(obj As JsonObject) As ProtonLogical
+        Public Shared Function FromJson(obj As JsonObject) As ProtonLogical
             If obj Is Nothing Then Return Nothing
 
             Dim logical As New ProtonLogical With {
@@ -162,7 +185,7 @@ Namespace Models
             Return logical
         End Function
 
-        Friend Shared Function ParseTier(value As Integer) As ServerTier
+        Public Shared Function ParseTier(value As Integer) As ServerTier
             Select Case value
                 Case 0 : Return ServerTier.Free
                 Case 1 : Return ServerTier.Basic

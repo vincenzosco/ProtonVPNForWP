@@ -20,7 +20,7 @@ Namespace Crypto
         Private Const HashBytesEncoded As Integer = 23 ' bcrypt only encodes 23 of the 24 bytes
 
         ''' <summary>"OrpheanBeholderScryDoubt" -- the string bcrypt encrypts 64 times.</summary>
-        Private Shared ReadOnly MagicCipher As Byte() = Encoding.ASCII.GetBytes("OrpheanBeholderScryDoubt")
+        Private Shared ReadOnly MagicCipher As Byte() = CryptoBytes.AsciiBytes("OrpheanBeholderScryDoubt")
 
         Private Sub New()
         End Sub

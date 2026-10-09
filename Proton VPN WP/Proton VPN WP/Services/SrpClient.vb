@@ -55,7 +55,7 @@ Namespace Crypto
         End Function
 
         Private Shared Function EncodingAscii(value As String) As Byte()
-            Return System.Text.Encoding.ASCII.GetBytes(value)
+            Return CryptoBytes.AsciiBytes(value)
         End Function
 
         ''' <summary>

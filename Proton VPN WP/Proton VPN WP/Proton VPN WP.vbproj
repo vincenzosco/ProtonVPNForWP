@@ -97,6 +97,55 @@
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="My Project\AssemblyInfo.vb" />
+    <Compile Include="Models\ApiResult.vb" />
+    <Compile Include="Models\AppSettings.vb" />
+    <Compile Include="Models\Credentials.vb" />
+    <Compile Include="Models\ProfileFieldRow.vb" />
+    <Compile Include="Models\ProtonLogical.vb" />
+    <Compile Include="Models\ProtonSession.vb" />
+    <Compile Include="Models\VpnProfile.vb" />
+    <Compile Include="Services\AppServices.vb" />
+    <Compile Include="Services\Bcrypt.vb" />
+    <Compile Include="Services\BlowfishTables.vb" />
+    <Compile Include="Services\ConnectivityService.vb" />
+    <Compile Include="Services\CredentialVault.vb" />
+    <Compile Include="Services\CryptoBytes.vb" />
+    <Compile Include="Services\Json.vb" />
+    <Compile Include="Services\Log.vb" />
+    <Compile Include="Services\ProtonApiClient.vb" />
+    <Compile Include="Services\ProtonAuthService.vb" />
+    <Compile Include="Services\RandomSource.vb" />
+    <Compile Include="Services\ServerCatalog.vb" />
+    <Compile Include="Services\SettingsStore.vb" />
+    <Compile Include="Services\Sha512.vb" />
+    <Compile Include="Services\SrpClient.vb" />
+    <Compile Include="Services\VpnProfileBuilder.vb" />
+    <Compile Include="ViewModels\HomeViewModel.vb" />
+    <Compile Include="ViewModels\LoginViewModel.vb" />
+    <Compile Include="ViewModels\ProfileViewModel.vb" />
+    <Compile Include="ViewModels\ServersViewModel.vb" />
+    <Compile Include="ViewModels\ViewModelBase.vb" />
+    <Compile Include="Views\AboutPage.xaml.vb">
+      <DependentUpon>AboutPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\HomePage.xaml.vb">
+      <DependentUpon>HomePage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LoginPage.xaml.vb">
+      <DependentUpon>LoginPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ProfilePage.xaml.vb">
+      <DependentUpon>ProfilePage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ServerDetailPage.xaml.vb">
+      <DependentUpon>ServerDetailPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ServersPage.xaml.vb">
+      <DependentUpon>ServersPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SettingsPage.xaml.vb">
+      <DependentUpon>SettingsPage.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">
@@ -110,6 +159,7 @@
     <Content Include="Assets\Square71x71Logo.scale-240.png" />
     <Content Include="Assets\StoreLogo.scale-240.png" />
     <Content Include="Assets\WideLogo.scale-240.png" />
+    <Content Include="Data\servers.json" />
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -117,6 +167,34 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Page Include="MainPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\AboutPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\HomePage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LoginPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\ProfilePage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\ServerDetailPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\ServersPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\SettingsPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

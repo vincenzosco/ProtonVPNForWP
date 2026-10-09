@@ -5,7 +5,7 @@
 ' is deliberate: the app must be usable with no network at all.
 Imports System.Collections.Generic
 Imports System.Threading.Tasks
-Imports Models
+Imports Proton_VPN_WP.Models
 Imports Windows.Data.Json
 Imports Windows.Storage
 
@@ -192,12 +192,38 @@ Namespace Services
             Return best
         End Function
 
+        ''' <summary>
+        ''' Drops the cached response and the in-memory list, so the next load has to go
+        ''' back to the API or the bundled snapshot.
+        ''' </summary>
+        Friend Async Function ResetAsync() As Task
+            _servers.Clear()
+            Source = CatalogueSource.None
+            Try
+                Dim folder As StorageFolder = Windows.Storage.ApplicationData.Current.LocalFolder
+                Dim file As StorageFile = Await TryGetCacheFileAsync(folder)
+                If file IsNot Nothing Then Await file.DeleteAsync()
+            Catch ex As Exception
+                Log.Warn("Could not delete the catalogue cache: " & ex.Message)
+            End Try
+        End Function
+
+        ''' <summary>
+        ''' WP8.1's StorageFolder has no TryGetItemAsync, so a missing file is reported
+        ''' as an exception and turned back into Nothing here.
+        ''' </summary>
+        Private Shared Async Function TryGetCacheFileAsync(folder As StorageFolder) As Task(Of StorageFile)
+            Try
+                Return Await folder.GetFileAsync(CacheFileName)
+            Catch ex As Exception
+                Return Nothing
+            End Try
+        End Function
+
         Private Shared Async Function ReadCacheAsync() As Task(Of String)
             Try
                 Dim folder As StorageFolder = Windows.Storage.ApplicationData.Current.LocalFolder
-                Dim item As IStorageItem = Await folder.TryGetItemAsync(CacheFileName)
-                If item Is Nothing Then Return Nothing
-                Dim file As StorageFile = TryCast(item, StorageFile)
+                Dim file As StorageFile = Await TryGetCacheFileAsync(folder)
                 If file Is Nothing Then Return Nothing
                 Return Await FileIO.ReadTextAsync(file)
             Catch ex As Exception

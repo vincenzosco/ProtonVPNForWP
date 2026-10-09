@@ -22,6 +22,18 @@ Namespace Crypto
             Return result
         End Function
 
+        ''' <summary>
+        ''' ASCII bytes for a string.
+        '''
+        ''' Windows Phone 8.1 has no System.Text.Encoding.ASCII, so this goes through
+        ''' UTF-8. That is exact here, not a shortcut: every input in this project is
+        ''' printable ASCII, and UTF-8 encodes ASCII characters as themselves.
+        ''' </summary>
+        Friend Shared Function AsciiBytes(value As String) As Byte()
+            If value Is Nothing Then Return New Byte() {}
+            Return System.Text.Encoding.UTF8.GetBytes(value)
+        End Function
+
         Friend Shared Function ToHex(data As Byte()) As String
             If data Is Nothing Then Return String.Empty
             Dim sb As New System.Text.StringBuilder(data.Length * 2)

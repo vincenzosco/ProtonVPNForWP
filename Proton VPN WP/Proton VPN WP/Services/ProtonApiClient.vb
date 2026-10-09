@@ -9,7 +9,7 @@
 ' throwing so the UI can fall back to the bundled catalogue.
 Imports System.Threading
 Imports System.Threading.Tasks
-Imports Models
+Imports Proton_VPN_WP.Models
 Imports Windows.Data.Json
 Imports Windows.Storage.Streams
 Imports Windows.Web.Http
@@ -84,7 +84,9 @@ Namespace Services
             Return Await SendAsync(HttpMethod.Get, url, Nothing, UserId, AccessToken)
         End Function
 
-        Private Async Function SendAsync(method As HttpMethod, url As String, json As String,
+        ' The body parameter must NOT be called "json": VB is case-insensitive, so a
+        ' local named json would shadow the Json helper class used below.
+        Private Async Function SendAsync(method As HttpMethod, url As String, jsonBody As String,
                                          uid As String, token As String) As Task(Of ApiResult(Of JsonObject))
             Dim effectiveUid As String = If(uid, UserId)
             Dim effectiveToken As String = If(token, AccessToken)
@@ -97,8 +99,8 @@ Namespace Services
                     If Not String.IsNullOrEmpty(effectiveToken) Then
                         request.Headers.Authorization = New Windows.Web.Http.Headers.HttpCredentialsHeaderValue("Bearer", effectiveToken)
                     End If
-                    If json IsNot Nothing Then
-                        request.Content = New HttpStringContent(json, UnicodeEncoding.Utf8, "application/json")
+                    If jsonBody IsNot Nothing Then
+                        request.Content = New HttpStringContent(jsonBody, UnicodeEncoding.Utf8, "application/json")
                     End If
 
                     Using cancellation As New CancellationTokenSource(TimeSpan.FromSeconds(RequestTimeout))
