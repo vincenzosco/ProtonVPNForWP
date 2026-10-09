@@ -1,7 +1,7 @@
 # Proton VPN for Windows Phone 8.1 — Implementation Plan
 
 Plan file: `docs/plans/proton-vpn-wp81.md`
-Branch: `feature/proton-vpn-wp81`
+Branch: `main` (the implementation landed on `feature/proton-vpn-wp81`, which is now `main`)
 Repo root: `C:\Users\Vincenzo\Documents\ProtonVPNForWP81`
 
 ## Goal
