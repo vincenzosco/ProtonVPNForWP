@@ -32,6 +32,8 @@ SIGNATURES = {
     "MainPage": "Protected Overrides Async Sub OnNavigatedTo(",
     "WaitForRestore": "Private Shared Async Function WaitForRestoreAsync()",
     "RestoreAsync": "Friend Async Function RestoreAsync()",
+    "OnSuspending": "Private Sub OnSuspending(",
+    "OnBackPressed": "Private Sub OnBackPressed(",
     "LogWrite": "Private Shared Sub Write(",
 }
 
@@ -84,6 +86,9 @@ def main() -> int:
     wait = code_only(body_of(main_src, SIGNATURES["WaitForRestore"]))
     restore = code_only(body_of(auth_src, SIGNATURES["RestoreAsync"]))
     write = code_only(body_of(log_src, SIGNATURES["LogWrite"]))
+    app_code = code_only(app_src)
+    suspending = code_only(body_of(app_src, SIGNATURES["OnSuspending"]))
+    back = code_only(body_of(main_src, SIGNATURES["OnBackPressed"]))
     store = code_only(store_src)
 
     ok = True
@@ -139,6 +144,27 @@ def main() -> int:
         all(f'<Compile Include="Services\\{name}" />' in proj_src for name in ("LogFilePolicy.vb", "LogStore.vb")),
         "both new sources are registered in the project",
         "A source file that is not a Compile item is dead code the build never sees.",
+    )
+
+    ok &= check(
+        "Log.Info" in suspending
+        and "lifecycle: suspending" in suspending
+        and "AddHandler Me.Suspending" in app_code,
+        "the app records its own suspension",
+        "A debugger session that ends at a suspension reads as \"the app closed\" with "
+        "nothing in the log naming the step; Start and the app switcher both arrive here. "
+        "Windows.UI.Xaml.Application has no OnSuspending to override (BC30284), so the "
+        "handler is wired with AddHandler, as the UnhandledException handler already is.",
+    )
+
+    ok &= check(
+        "Log.Info" in back
+        and "lifecycle: back pressed" in back
+        and back.find("RootFrame.CanGoBack") < back.find("lifecycle: back pressed"),
+        "the shell records the back press it lets through",
+        "With an empty page stack the platform closes the app and no line says so, which "
+        "is indistinguishable in the log from a process that died for another reason. "
+        "The line belongs after the early return, on the path that closes the app.",
     )
 
     print("startup invariants: " + ("OK" if ok else "FAILED"))

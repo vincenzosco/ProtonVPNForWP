@@ -79,7 +79,14 @@ Partial Public NotInheritable Class MainPage
         If RootFrame.CanGoBack Then
             e.Handled = True
             RootFrame.GoBack()
+            Return
         End If
+
+        ' Deliberately not handled: with an empty page stack the platform closes the app.
+        ' The line is what tells that apart from a process that died for another reason --
+        ' the device transcripts of 2026-10-09 ended in "exited with code 0" with nothing
+        ' in the log naming the step.
+        Log.Info("lifecycle: back pressed with an empty page stack; the platform closes the app")
     End Sub
 
 End Class

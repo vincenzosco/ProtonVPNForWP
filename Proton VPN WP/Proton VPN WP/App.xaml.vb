@@ -1,6 +1,7 @@
 ' Application bootstrap.
 Imports System.Threading.Tasks
 Imports Proton_VPN_WP.Services
+Imports Windows.ApplicationModel
 Imports Windows.ApplicationModel.Activation
 Imports Windows.UI.Xaml
 Imports Windows.UI.Xaml.Controls
@@ -29,6 +30,10 @@ Partial Public NotInheritable Class App
         Log.Info("startup: app constructed")
         InitializeComponent()
         AddHandler Me.UnhandledException, AddressOf OnUnhandledException
+        ' A suspension is an event on Windows.UI.Xaml.Application, not an overridable
+        ' method (there is no OnSuspending to override: BC30284), so it is wired the
+        ' same way the handler above is.
+        AddHandler Me.Suspending, AddressOf OnSuspending
     End Sub
 
     Protected Overrides Sub OnLaunched(args As LaunchActivatedEventArgs)
@@ -54,6 +59,15 @@ Partial Public NotInheritable Class App
         ' Started here, awaited with a budget by the shell before it decides which
         ' page to show.
         _sessionRestore = RestoreSessionAsync()
+    End Sub
+
+    Private Sub OnSuspending(sender As Object, e As SuspendingEventArgs)
+        ' Start and the app switcher both arrive here. A debugger session that ends at a
+        ' suspension reads as "the app closed" with nothing in the log naming the step,
+        ' which is exactly how two device transcripts of 2026-10-09 ended. The word
+        ' lifecycle: is what marks a step the platform caused, so its absence keeps
+        ' meaning "the process died some other way".
+        Log.Info("lifecycle: suspending")
     End Sub
 
     Private Async Function RestoreSessionAsync() As Task

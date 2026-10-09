@@ -200,6 +200,14 @@ The startup path logs both sides of each step (`startup:`, `restore:`, `vault:`)
 **the last line in the file names the step that stalled**. That is the whole point:
 a stall becomes legible without attaching a debugger.
 
+A line beginning `lifecycle:` names a step the platform caused rather than a failure:
+`suspending` when Start or the app switcher sends the app away, and `back pressed with
+an empty page stack` when the shell lets a back press through and the platform closes
+the app. Those are the two ways a session ends with no error at all, so their
+**absence** stays evidence that the process died for some other reason -- which is what
+the two device transcripts of 2026-10-09 ended in ("exited with code 0", no handler
+line, nothing naming the step).
+
 To retrieve it, use the SDK's Isolated Storage Explorer. Its own usage text gives
 the arguments: `ts` takes a snapshot of the isolated store to the desktop, `de`
 selects a Windows Phone connected to the desktop, `xd` the default emulator, and
