@@ -73,9 +73,11 @@ Namespace Services
 
         ''' <summary>Registers for connectivity changes and returns an unsubscribe action.</summary>
         Friend Shared Function ObserveNetworkChanges(handler As NetworkStatusChangedEventHandler) As Action
-            NetworkInformation.NetworkStatusChanged += handler
+            ' VB has no += for events declared on another type, so AddHandler is the
+            ' only way to subscribe to this static event.
+            AddHandler NetworkInformation.NetworkStatusChanged, handler
             Return Sub()
-                       NetworkInformation.NetworkStatusChanged -= handler
+                       RemoveHandler NetworkInformation.NetworkStatusChanged, handler
                    End Sub
         End Function
 

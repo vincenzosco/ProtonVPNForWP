@@ -1,24 +1,44 @@
-﻿' The Blank Application template is documented at http://go.microsoft.com/fwlink/?LinkID=391641
+' The application shell: owns the navigation frame and the hardware back button.
+Imports System.Threading.Tasks
+Imports Proton_VPN_WP.Services
+Imports Windows.Phone.UI.Input
+Imports Windows.UI.Xaml.Controls
+Imports Windows.UI.Xaml.Navigation
 
-''' <summary>
-''' An empty page that can be used on its own or navigated to within a Frame.
-''' </summary>
-Public NotInheritable Class MainPage
+Partial Public NotInheritable Class MainPage
     Inherits Page
 
-    ''' <summary>
-    ''' Invoked when this page is about to be displayed in a Frame.
-    ''' </summary>
-    ''' <param name="e">Event data that describes how this page was reached.
-    ''' This parameter is typically used to configure the page.</param>
-    Protected Overrides Sub OnNavigatedTo(e As Navigation.NavigationEventArgs)
-        ' TODO: Prepare the page for display here.
+    Private _unsubscribe As Action
 
-        ' TODO: If your application contains multiple pages, ensure that you are
-        ' handling the hardware Back button by registering for the
-        ' Windows.Phone.UI.Input.HardwareButtons.BackPressed event.
-        ' If you are using the NavigationHelper provided by some templates,
-        ' this event is handled for you.
+    Protected Overrides Sub OnNavigatedTo(e As NavigationEventArgs)
+        MyBase.OnNavigatedTo(e)
+
+        AddHandler HardwareButtons.BackPressed, AddressOf OnBackPressed
+
+        ' Start on the dashboard when a session is still on the device, otherwise sign in.
+        If RootFrame.Content Is Nothing Then
+            If AppServices.Current.IsSignedIn Then
+                RootFrame.Navigate(GetType(Views.HomePage))
+            Else
+                RootFrame.Navigate(GetType(Views.LoginPage))
+            End If
+        End If
+    End Sub
+
+    Protected Overrides Sub OnNavigatedFrom(e As NavigationEventArgs)
+        MyBase.OnNavigatedFrom(e)
+        RemoveHandler HardwareButtons.BackPressed, AddressOf OnBackPressed
+        If _unsubscribe IsNot Nothing Then
+            _unsubscribe.Invoke()
+            _unsubscribe = Nothing
+        End If
+    End Sub
+
+    Private Sub OnBackPressed(sender As Object, e As BackPressedEventArgs)
+        If RootFrame.CanGoBack Then
+            e.Handled = True
+            RootFrame.GoBack()
+        End If
     End Sub
 
 End Class

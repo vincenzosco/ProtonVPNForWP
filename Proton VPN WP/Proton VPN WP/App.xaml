@@ -1,7 +1,137 @@
-﻿<Application
+<Application
     x:Class="Proton_VPN_WP.App"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:Proton_VPN_WP">
 
+    <Application.Resources>
+        <ResourceDictionary>
+
+            <!-- Proton VPN brand palette -->
+            <Color x:Key="ProtonBackgroundColor">#FF1B1340</Color>
+            <Color x:Key="ProtonSurfaceColor">#FF2A1E5C</Color>
+            <Color x:Key="ProtonSurfaceAltColor">#FF382B72</Color>
+            <Color x:Key="ProtonAccentColor">#FF6D4AFF</Color>
+            <Color x:Key="ProtonAccentDarkColor">#FF5334D6</Color>
+            <Color x:Key="ProtonTextColor">#FFF3F1FB</Color>
+            <Color x:Key="ProtonTextMutedColor">#FFB6AED6</Color>
+            <Color x:Key="ProtonSuccessColor">#FF3DD68C</Color>
+            <Color x:Key="ProtonWarningColor">#FFFFB020</Color>
+            <Color x:Key="ProtonDangerColor">#FFFF5C5C</Color>
+            <Color x:Key="ProtonDividerColor">#FF443987</Color>
+
+            <SolidColorBrush x:Key="ProtonBackgroundBrush" Color="{StaticResource ProtonBackgroundColor}" />
+            <SolidColorBrush x:Key="ProtonSurfaceBrush" Color="{StaticResource ProtonSurfaceColor}" />
+            <SolidColorBrush x:Key="ProtonSurfaceAltBrush" Color="{StaticResource ProtonSurfaceAltColor}" />
+            <SolidColorBrush x:Key="ProtonAccentBrush" Color="{StaticResource ProtonAccentColor}" />
+            <SolidColorBrush x:Key="ProtonAccentDarkBrush" Color="{StaticResource ProtonAccentDarkColor}" />
+            <SolidColorBrush x:Key="ProtonTextBrush" Color="{StaticResource ProtonTextColor}" />
+            <SolidColorBrush x:Key="ProtonTextMutedBrush" Color="{StaticResource ProtonTextMutedColor}" />
+            <SolidColorBrush x:Key="ProtonSuccessBrush" Color="{StaticResource ProtonSuccessColor}" />
+            <SolidColorBrush x:Key="ProtonWarningBrush" Color="{StaticResource ProtonWarningColor}" />
+            <SolidColorBrush x:Key="ProtonDangerBrush" Color="{StaticResource ProtonDangerColor}" />
+            <SolidColorBrush x:Key="ProtonDividerBrush" Color="{StaticResource ProtonDividerColor}" />
+
+            <!-- Typography -->
+            <Style x:Key="ProtonPageTitle" TargetType="TextBlock">
+                <Setter Property="Foreground" Value="{StaticResource ProtonTextBrush}" />
+                <Setter Property="FontSize" Value="30" />
+                <Setter Property="FontWeight" Value="Light" />
+                <Setter Property="Margin" Value="0,0,0,4" />
+                <Setter Property="TextWrapping" Value="Wrap" />
+            </Style>
+
+            <Style x:Key="ProtonSubtitle" TargetType="TextBlock">
+                <Setter Property="Foreground" Value="{StaticResource ProtonTextMutedBrush}" />
+                <Setter Property="FontSize" Value="15" />
+                <Setter Property="TextWrapping" Value="Wrap" />
+            </Style>
+
+            <Style x:Key="ProtonSectionHeader" TargetType="TextBlock">
+                <Setter Property="Foreground" Value="{StaticResource ProtonTextMutedBrush}" />
+                <Setter Property="FontSize" Value="13" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="Margin" Value="0,18,0,6" />
+            </Style>
+
+            <Style x:Key="ProtonBody" TargetType="TextBlock">
+                <Setter Property="Foreground" Value="{StaticResource ProtonTextBrush}" />
+                <Setter Property="FontSize" Value="16" />
+                <Setter Property="TextWrapping" Value="Wrap" />
+            </Style>
+
+            <Style x:Key="ProtonCaption" TargetType="TextBlock">
+                <Setter Property="Foreground" Value="{StaticResource ProtonTextMutedBrush}" />
+                <Setter Property="FontSize" Value="13" />
+                <Setter Property="TextWrapping" Value="Wrap" />
+            </Style>
+
+            <Style x:Key="ProtonMono" TargetType="TextBlock">
+                <Setter Property="Foreground" Value="{StaticResource ProtonTextBrush}" />
+                <Setter Property="FontFamily" Value="Consolas" />
+                <Setter Property="FontSize" Value="13" />
+                <Setter Property="TextWrapping" Value="Wrap" />
+                <Setter Property="IsTextSelectionEnabled" Value="True" />
+            </Style>
+
+            <!-- Controls -->
+            <Style x:Key="ProtonPrimaryButton" TargetType="Button">
+                <Setter Property="Background" Value="{StaticResource ProtonAccentBrush}" />
+                <Setter Property="Foreground" Value="White" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="Padding" Value="18,12" />
+                <Setter Property="FontSize" Value="16" />
+                <Setter Property="HorizontalAlignment" Value="Stretch" />
+                <Setter Property="Margin" Value="0,8,0,0" />
+            </Style>
+
+            <Style x:Key="ProtonSecondaryButton" TargetType="Button">
+                <Setter Property="Background" Value="{StaticResource ProtonSurfaceAltBrush}" />
+                <Setter Property="Foreground" Value="{StaticResource ProtonTextBrush}" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="Padding" Value="18,12" />
+                <Setter Property="FontSize" Value="16" />
+                <Setter Property="HorizontalAlignment" Value="Stretch" />
+                <Setter Property="Margin" Value="0,8,0,0" />
+            </Style>
+
+            <Style x:Key="ProtonDangerButton" TargetType="Button">
+                <Setter Property="Background" Value="{StaticResource ProtonDangerBrush}" />
+                <Setter Property="Foreground" Value="White" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="Padding" Value="18,12" />
+                <Setter Property="FontSize" Value="16" />
+                <Setter Property="HorizontalAlignment" Value="Stretch" />
+                <Setter Property="Margin" Value="0,8,0,0" />
+            </Style>
+
+            <Style x:Key="ProtonTextBox" TargetType="TextBox">
+                <Setter Property="Background" Value="{StaticResource ProtonSurfaceBrush}" />
+                <Setter Property="Foreground" Value="{StaticResource ProtonTextBrush}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="BorderBrush" Value="{StaticResource ProtonDividerBrush}" />
+                <Setter Property="Padding" Value="12,10" />
+                <Setter Property="Margin" Value="0,4,0,0" />
+                <Setter Property="FontSize" Value="16" />
+            </Style>
+
+            <Style x:Key="ProtonPasswordBox" TargetType="PasswordBox">
+                <Setter Property="Background" Value="{StaticResource ProtonSurfaceBrush}" />
+                <Setter Property="Foreground" Value="{StaticResource ProtonTextBrush}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="BorderBrush" Value="{StaticResource ProtonDividerBrush}" />
+                <Setter Property="Padding" Value="12,10" />
+                <Setter Property="Margin" Value="0,4,0,0" />
+                <Setter Property="FontSize" Value="16" />
+            </Style>
+
+            <Style x:Key="ProtonCard" TargetType="Border">
+                <Setter Property="Background" Value="{StaticResource ProtonSurfaceBrush}" />
+                <Setter Property="CornerRadius" Value="8" />
+                <Setter Property="Padding" Value="16" />
+                <Setter Property="Margin" Value="0,0,0,12" />
+            </Style>
+
+        </ResourceDictionary>
+    </Application.Resources>
 </Application>

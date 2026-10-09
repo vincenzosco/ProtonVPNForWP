@@ -1,0 +1,133 @@
+<Page
+    x:Class="Proton_VPN_WP.Views.ProfilePage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{StaticResource ProtonBackgroundBrush}">
+
+    <Grid>
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="20,20,20,32">
+
+                <TextBlock Text="VPN profile" Style="{StaticResource ProtonPageTitle}" />
+                <TextBlock x:Name="LocationText"
+                           Text="Pick a server first"
+                           Style="{StaticResource ProtonSubtitle}"
+                           AutomationProperties.Name="ProfileLocation" />
+
+                <Border Style="{StaticResource ProtonCard}" Margin="0,16,0,12">
+                    <StackPanel>
+                        <TextBlock Text="{Binding ServerName}"
+                                   Style="{StaticResource ProtonBody}"
+                                   FontSize="22"
+                                   FontWeight="SemiBold"
+                                   AutomationProperties.Name="ProfileServerName" />
+                        <TextBlock Text="{Binding ServerAddress}"
+                                   Style="{StaticResource ProtonCaption}"
+                                   AutomationProperties.Name="ProfileServerAddress" />
+                        <TextBlock Text="{Binding KindText}"
+                                   Style="{StaticResource ProtonCaption}"
+                                   Margin="0,4,0,0" />
+                        <TextBlock Text="{Binding CredentialSourceLine}"
+                                   Style="{StaticResource ProtonCaption}"
+                                   Margin="0,8,0,0"
+                                   TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
+
+                <TextBlock Text="SETTINGS → VPN → ADD, TYPE THESE VALUES"
+                           Style="{StaticResource ProtonSectionHeader}" />
+
+                <ListView x:Name="FieldList"
+                          SelectionMode="None"
+                          IsItemClickEnabled="False"
+                          Margin="0,4,0,0"
+                          AutomationProperties.Name="ProfileFieldList">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <Border Background="{StaticResource ProtonSurfaceBrush}"
+                                    CornerRadius="6"
+                                    Margin="0,3,0,3"
+                                    Padding="14,10,14,10">
+                                <StackPanel>
+                                    <TextBlock Foreground="{StaticResource ProtonTextMutedBrush}"
+                                               FontSize="12">
+                                        <Run Text="{Binding Ordinal}" />
+                                        <Run Text=". " />
+                                        <Run Text="{Binding Label}" />
+                                    </TextBlock>
+                                    <TextBlock Text="{Binding Value}"
+                                               Foreground="{StaticResource ProtonTextBrush}"
+                                               FontSize="17"
+                                               FontFamily="Consolas"
+                                               TextWrapping="Wrap" />
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+
+                <ToggleSwitch x:Name="RevealSwitch"
+                              Header="Show password"
+                              OnContent="Visible"
+                              OffContent="Hidden"
+                              Toggled="OnRevealToggled"
+                              Margin="0,12,0,0"
+                              AutomationProperties.Name="RevealPasswordSwitch" />
+
+                <TextBlock Text="VALUES TO COPY" Style="{StaticResource ProtonSectionHeader}" Margin="0,16,0,4" />
+                <TextBox x:Name="CopyUsernameBox"
+                         Header="User name"
+                         IsReadOnly="True"
+                         Background="{StaticResource ProtonSurfaceBrush}"
+                         Foreground="{StaticResource ProtonTextBrush}"
+                         Margin="0,0,0,8"
+                         AutomationProperties.Name="CopyableUsername" />
+                <TextBox x:Name="CopyPasswordBox"
+                         Header="Password"
+                         IsReadOnly="True"
+                         Background="{StaticResource ProtonSurfaceBrush}"
+                         Foreground="{StaticResource ProtonTextBrush}"
+                         AutomationProperties.Name="CopyablePassword" />
+                <TextBlock Style="{StaticResource ProtonCaption}"
+                           TextWrapping="Wrap"
+                           Margin="0,6,0,0"
+                           Text="Windows Phone 8.1 gives apps no clipboard API, so these two fields are selectable instead: press and hold the text, then copy it."
+                           AutomationProperties.Name="ClipboardLimitationNote" />
+
+                <Button x:Name="OpenSettingsButton"
+                        Content="Open Windows Phone VPN settings"
+                        Style="{StaticResource ProtonPrimaryButton}"
+                        Click="OnOpenSettingsClick"
+                        AutomationProperties.Name="OpenVpnSettingsButton" />
+
+                <TextBlock x:Name="NoticeText"
+                           Style="{StaticResource ProtonCaption}"
+                           Foreground="{StaticResource ProtonWarningBrush}"
+                           TextWrapping="Wrap"
+                           Visibility="Collapsed"
+                           Margin="0,8,0,0" />
+
+                <TextBlock x:Name="StatusText"
+                           Style="{StaticResource ProtonCaption}"
+                           Margin="0,10,0,0" />
+
+                <TextBlock Text="HOW IT WORKS"
+                           Style="{StaticResource ProtonSectionHeader}"
+                           Margin="0,22,0,6" />
+                <TextBlock Style="{StaticResource ProtonCaption}"
+                           TextWrapping="Wrap"
+                           Text="Windows Phone 8.1 does not let an app start a VPN tunnel by itself. This page therefore hands you exactly the values the built-in VPN client needs; you add the profile once, and from then on you connect from the system VPN list and use the Home page to check which network you are on."
+                           AutomationProperties.Name="ProfileExplanationText" />
+
+            </StackPanel>
+        </ScrollViewer>
+
+        <ProgressRing x:Name="BusyRing"
+                      IsActive="False"
+                      Foreground="{StaticResource ProtonAccentBrush}"
+                      Width="34" Height="34" />
+    </Grid>
+</Page>

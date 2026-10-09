@@ -1,0 +1,60 @@
+<Page
+    x:Class="Proton_VPN_WP.Views.AboutPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{StaticResource ProtonBackgroundBrush}">
+
+    <Grid>
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="20,20,20,40">
+
+                <TextBlock Text="About" Style="{StaticResource ProtonPageTitle}" />
+                <TextBlock x:Name="VersionText" Text="Version —" Style="{StaticResource ProtonSubtitle}" AutomationProperties.Name="AboutVersion" />
+
+                <Border Style="{StaticResource ProtonCard}" Margin="0,16,0,12">
+                    <StackPanel>
+                        <TextBlock Text="What this app does" Style="{StaticResource ProtonSectionHeader}" Margin="0,0,0,6" />
+                        <TextBlock Style="{StaticResource ProtonBody}"
+                                   TextWrapping="Wrap"
+                                   Text="Signs in to your Proton account, downloads the live server list (and works from an offline copy when there is no network), then gives you the exact IKEv2 / OpenVPN values Windows Phone's built-in VPN client needs." />
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource ProtonCard}">
+                    <StackPanel>
+                        <TextBlock Text="What this app cannot do" Style="{StaticResource ProtonSectionHeader}" Margin="0,0,0,6" />
+                        <TextBlock Style="{StaticResource ProtonBody}"
+                                   TextWrapping="Wrap"
+                                   Text="Windows Phone 8.1 gives third-party apps no VPN API: no profile installation and no tunnel control. Nothing in this app can connect or disconnect the tunnel for you — that always happens in the system VPN list. Treat the 'connection' card on the Home page as status, never as a switch." />
+                    </StackPanel>
+                </Border>
+
+                <TextBlock Text="CRYPTOGRAPHY" Style="{StaticResource ProtonSectionHeader}" />
+                <TextBlock Style="{StaticResource ProtonCaption}"
+                           TextWrapping="Wrap"
+                           Text="Windows Phone 8.1 has no usable System.Security.Cryptography. The app therefore carries its own SHA-512, bcrypt (for Proton's password hash) and SRP-6a implementation, all cross-checked against an independent reference implementation before every release." />
+
+                <TextBlock Text="PRIVACY" Style="{StaticResource ProtonSectionHeader}" />
+                <TextBlock Style="{StaticResource ProtonCaption}"
+                           TextWrapping="Wrap"
+                           Text="Passwords, SRP proofs and tokens never leave the device except as part of the normal Proton login exchange. Stored secrets are encrypted with DataProtectionProvider before they are written. No analytics, no third-party services." />
+
+                <TextBlock Text="LINKS" Style="{StaticResource ProtonSectionHeader}" />
+                <TextBlock x:Name="RepoText" Style="{StaticResource ProtonMono}" AutomationProperties.Name="AboutRepositoryLink" />
+                <Button x:Name="OpenRepoButton" Content="Open the project on GitHub" Style="{StaticResource ProtonPrimaryButton}" Click="OnOpenRepoClick" AutomationProperties.Name="OpenRepositoryButton" />
+                <Button x:Name="OpenProtonButton" Content="Open protonvpn.com" Style="{StaticResource ProtonSecondaryButton}" Click="OnOpenProtonClick" AutomationProperties.Name="OpenProtonButton" />
+
+                <TextBlock Text="CREDITS" Style="{StaticResource ProtonSectionHeader}" />
+                <TextBlock Style="{StaticResource ProtonCaption}"
+                           TextWrapping="Wrap"
+                           Text="Protocol behaviour follows the public ProtonVPN client implementations (github.com/ProtonVPN), the go-srp SRP implementation and the SRP-6a specification. Proton and Proton VPN are trademarks of Proton AG; this is an independent, unofficial client." />
+
+                <TextBlock x:Name="StatusText" Style="{StaticResource ProtonCaption}" Margin="0,14,0,0" TextWrapping="Wrap" AutomationProperties.Name="AboutStatus" />
+
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Page>
