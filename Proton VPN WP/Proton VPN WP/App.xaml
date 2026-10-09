@@ -33,8 +33,8 @@
             <SolidColorBrush x:Key="ProtonDividerBrush" Color="{StaticResource ProtonDividerColor}" />
 
             <!-- Input fields (what the user types). The WP8.1 text box template keeps
-                 the app's Foreground and switches the *field* to the platform's edit
-                 colour -- white -- while the field has focus, so text on the light side
+                 the app's Foreground and switches the FIELD to the platform's edit
+                 colour (white) while the field has focus, so text on the light side
                  of the pair disappears exactly while it is being typed. These are the
                  platform's own values: #FFFFFFFF field, #FF000000 text. -->
             <Color x:Key="ProtonInputBackgroundColor">#FFFFFFFF</Color>
