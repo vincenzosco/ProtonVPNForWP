@@ -34,6 +34,22 @@ Namespace Models
         End Property
 
         ''' <summary>
+        ''' The value the operating system's own "VPN type" field expects for this
+        ''' profile. It must follow Kind: the built-in Windows Phone client takes
+        ''' IKEv2 (or L2TP), while an OpenVPN profile is an export for an external
+        ''' client and never a value the built-in dialog accepts.
+        ''' </summary>
+        Friend ReadOnly Property VpnTypeValue As String
+            Get
+                Select Case Kind
+                    Case ProfileKind.OpenVpn : Return "OpenVPN"
+                    Case ProfileKind.L2tp : Return "L2TP / IPsec"
+                    Case Else : Return "IKEv2"
+                End Select
+            End Get
+        End Property
+
+        ''' <summary>
         ''' The ordered list of values to type into Settings -> VPN -> Add, which is
         ''' what the setup page shows the user step by step.
         ''' </summary>
@@ -41,7 +57,7 @@ Namespace Models
             Dim fields As New List(Of KeyValuePair(Of String, String))()
             fields.Add(New KeyValuePair(Of String, String)("Server name", ServerName))
             fields.Add(New KeyValuePair(Of String, String)("Server address", ServerAddress))
-            fields.Add(New KeyValuePair(Of String, String)("VPN type", "IKEv2"))
+            fields.Add(New KeyValuePair(Of String, String)("VPN type", VpnTypeValue))
             fields.Add(New KeyValuePair(Of String, String)("Username", Username))
             fields.Add(New KeyValuePair(Of String, String)("Password", Password))
             Return fields

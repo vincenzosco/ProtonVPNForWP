@@ -36,7 +36,7 @@ Namespace Models
             Me.Value = value
         End Sub
 
-        Friend Shared Function Success(value As T, Optional message As String = Nothing) As ApiResult(Of T)
+        Friend Shared Shadows Function Success(value As T, Optional message As String = Nothing) As ApiResult(Of T)
             Return New ApiResult(Of T)(True, message, value)
         End Function
 

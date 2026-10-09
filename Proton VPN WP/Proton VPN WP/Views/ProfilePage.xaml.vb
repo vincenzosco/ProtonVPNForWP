@@ -59,6 +59,11 @@ Namespace Views
             CopyUsernameBox.Text = _viewModel.Username
             CopyPasswordBox.Text = _viewModel.PasswordDisplay
             OpenSettingsButton.IsEnabled = _viewModel.HasProfile
+
+            ' An OpenVPN profile cannot be typed into the built-in dialog, so its
+            ' configuration is shown instead of pretending it can be.
+            OpenVpnPanel.Visibility = If(_viewModel.ShowOpenVpnConfig, Visibility.Visible, Visibility.Collapsed)
+            OpenVpnBox.Text = _viewModel.OpenVpnConfigText
         End Sub
 
     End Class

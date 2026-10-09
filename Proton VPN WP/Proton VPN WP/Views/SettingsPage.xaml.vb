@@ -18,11 +18,32 @@ Namespace Views
             InitializeComponent()
         End Sub
 
-        Protected Overrides Sub OnNavigatedTo(e As NavigationEventArgs)
+        Protected Overrides Async Sub OnNavigatedTo(e As NavigationEventArgs)
             MyBase.OnNavigatedTo(e)
             LoadFromSettings()
             RefreshDiagnostics()
+            Await LoadStoredCredentialsAsync()
         End Sub
+
+        ''' <summary>
+        ''' Fills the credential boxes from the vault.
+        '''
+        ''' This is not cosmetic: the page saves both fields whenever either is
+        ''' non-empty, so leaving the boxes blank meant that correcting just the user
+        ''' name wrote an empty password and destroyed the stored one.
+        ''' </summary>
+        Private Async Function LoadStoredCredentialsAsync() As Task
+            Dim stored As VpnCredentials = Await AppServices.Current.Vault.LoadCredentialsAsync()
+            If stored Is Nothing Then Return
+
+            _loading = True
+            Try
+                VpnUserBox.Text = If(stored.Username, String.Empty)
+                VpnPasswordBox.Password = If(stored.Password, String.Empty)
+            Finally
+                _loading = False
+            End Try
+        End Function
 
         Private Sub LoadFromSettings()
             _loading = True

@@ -76,8 +76,18 @@ Namespace Services
             End Try
         End Function
 
+        ''' <summary>
+        ''' Integer accessor that keeps this class's "never throws" contract.
+        '''
+        ''' TryNumber catches, but the narrowing conversion used to sit outside any
+        ''' catch: a JSON number outside Integer range raised OverflowException, which
+        ''' escaped ServerCatalog.LoadAsync and reached an unhandled-exception handler.
+        ''' </summary>
         Friend Shared Function TryInt(obj As JsonObject, name As String, fallback As Integer) As Integer
-            Return CInt(Math.Round(TryNumber(obj, name, CDbl(fallback))))
+            Dim number As Double = TryNumber(obj, name, CDbl(fallback))
+            If Double.IsNaN(number) OrElse Double.IsInfinity(number) Then Return fallback
+            If number > CDbl(Integer.MaxValue) OrElse number < CDbl(Integer.MinValue) Then Return fallback
+            Return CInt(Math.Round(number))
         End Function
 
         Friend Shared Function Str(value As String) As String

@@ -50,10 +50,15 @@ Namespace Services
             Return Await PostJsonAsync(AuthHost & "/auth", body)
         End Function
 
-        Friend Async Function PostTwoFactorAsync(username As String, code As String) As Task(Of ApiResult(Of JsonObject))
+        ''' <summary>
+        ''' Completes an in-flight two-factor sign-in. It needs the UID that /auth
+        ''' returned alongside code 1001, sent as x-pm-uid -- without it the request
+        ''' does not identify the attempt it is continuing.
+        ''' </summary>
+        Friend Async Function PostTwoFactorAsync(uid As String, code As String) As Task(Of ApiResult(Of JsonObject))
             Dim body As New JsonObject()
             body.SetNamedValue("TwoFactorCode", JsonValue.CreateStringValue(code))
-            Return Await PostJsonAsync(AuthHost & "/auth/2fa", body)
+            Return Await PostJsonAsync(AuthHost & "/auth/2fa", body, uid, Nothing)
         End Function
 
         Friend Async Function RefreshAsync(uid As String, refreshToken As String) As Task(Of ApiResult(Of JsonObject))
@@ -104,26 +109,29 @@ Namespace Services
                     End If
 
                     Using cancellation As New CancellationTokenSource(TimeSpan.FromSeconds(RequestTimeout))
-                        Dim response As HttpResponseMessage = Await _http.SendRequestAsync(request).AsTask(cancellation.Token)
-                        Dim text As String = Await response.Content.ReadAsStringAsync().AsTask(cancellation.Token)
+                        ' The response owns a network stream, so it is disposed with the
+                        ' request rather than left to finalisation.
+                        Using response As HttpResponseMessage = Await _http.SendRequestAsync(request).AsTask(cancellation.Token)
+                            Dim text As String = Await response.Content.ReadAsStringAsync().AsTask(cancellation.Token)
 
-                        Log.Info("HTTP " & CInt(response.StatusCode) & " " & method.ToString() & " " & SafePath(url))
+                            Log.Info("HTTP " & CInt(response.StatusCode) & " " & method.ToString() & " " & SafePath(url))
 
-                        If String.IsNullOrEmpty(text) Then
-                            Return ApiResult(Of JsonObject).Failure("Empty response from the server (" & CInt(response.StatusCode) & ").")
-                        End If
+                            If String.IsNullOrEmpty(text) Then
+                                Return ApiResult(Of JsonObject).Failure("Empty response from the server (" & CInt(response.StatusCode) & ").")
+                            End If
 
-                        Dim parsed As JsonObject = Json.TryParseObject(text)
-                        If parsed Is Nothing Then
-                            Return ApiResult(Of JsonObject).Failure("The server returned a response the app could not read.")
-                        End If
+                            Dim parsed As JsonObject = Json.TryParseObject(text)
+                            If parsed Is Nothing Then
+                                Return ApiResult(Of JsonObject).Failure("The server returned a response the app could not read.")
+                            End If
 
-                        Dim code As Integer = Json.TryInt(parsed, "Code", 0)
-                        If code = 1000 Then Return ApiResult(Of JsonObject).Success(parsed)
+                            Dim code As Integer = Json.TryInt(parsed, "Code", 0)
+                            If code = 1000 Then Return ApiResult(Of JsonObject).Success(parsed)
 
-                        Dim errorText As String = Json.TryString(parsed, "Error")
-                        If String.IsNullOrEmpty(errorText) Then errorText = DescribeCode(code)
-                        Return ApiResult(Of JsonObject).Failure(errorText & " (code " & code.ToString() & ")")
+                            Dim errorText As String = Json.TryString(parsed, "Error")
+                            If String.IsNullOrEmpty(errorText) Then errorText = DescribeCode(code)
+                            Return ApiResult(Of JsonObject).Failure(errorText & " (code " & code.ToString() & ")")
+                        End Using
                     End Using
                 End Using
             Catch ex As TaskCanceledException

@@ -19,6 +19,9 @@ Namespace Crypto
         Private Const WordMask As UInteger = &HFFFFFFFFUI
         Private Const HashBytesEncoded As Integer = 23 ' bcrypt only encodes 23 of the 24 bytes
 
+        ''' <summary>The maximum number of password bytes bcrypt will consume.</summary>
+        Private Const MaxKeyBytes As Integer = 72
+
         ''' <summary>"OrpheanBeholderScryDoubt" -- the string bcrypt encrypts 64 times.</summary>
         Private Shared ReadOnly MagicCipher As Byte() = CryptoBytes.AsciiBytes("OrpheanBeholderScryDoubt")
 
@@ -106,9 +109,14 @@ Namespace Crypto
                 Throw New ArgumentException("Invalid bcrypt salt length.", "saltString")
             End If
 
+            ' bcrypt's key schedule is defined over at most 72 bytes, and every
+            ' reference implementation enforces that (python-bcrypt refuses a longer
+            ' input outright). Hashing more would derive a hash no server can match.
+            Dim take As Integer = Math.Min(password.Length, MaxKeyBytes)
+
             ' bcrypt terminates the key with a NUL byte.
-            Dim key(password.Length) As Byte
-            Array.Copy(password, key, password.Length)
+            Dim key(take) As Byte
+            Array.Copy(password, key, take)
 
             Dim raw As Byte() = CryptRaw(key, saltBytes, rounds)
 

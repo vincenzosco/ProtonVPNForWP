@@ -138,6 +138,24 @@ Namespace ViewModels
             End Get
         End Property
 
+        ''' <summary>
+        ''' True when the selected profile is an OpenVPN export. An OpenVPN profile
+        ''' cannot be entered into the built-in VPN client, so the page has to say so
+        ''' and show the configuration instead of a type it would reject.
+        ''' </summary>
+        Friend ReadOnly Property ShowOpenVpnConfig As Boolean
+            Get
+                Return _profile IsNot Nothing AndAlso _profile.Kind = ProfileKind.OpenVpn
+            End Get
+        End Property
+
+        Friend ReadOnly Property OpenVpnConfigText As String
+            Get
+                If _profile Is Nothing Then Return String.Empty
+                Return If(_profile.OpenVpnText, String.Empty)
+            End Get
+        End Property
+
         Friend Async Function LoadAsync() As Task
             IsBusy = True
             StatusMessage = "Preparing your profile…"
@@ -170,6 +188,8 @@ Namespace ViewModels
                 Username = If(String.IsNullOrEmpty(_profile.Username), "—", _profile.Username)
                 _password = _profile.Password
                 RaisePropertyChanged("PasswordDisplay")
+                RaisePropertyChanged("ShowOpenVpnConfig")
+                RaisePropertyChanged("OpenVpnConfigText")
                 CredentialSourceLine = DescribeCredentials(credentials)
                 RebuildFields()
                 UpdateNotice(server, credentials)
@@ -222,7 +242,8 @@ Namespace ViewModels
             Dim rows As New List(Of ProfileFieldRow)()
             rows.Add(New ProfileFieldRow With {.Ordinal = 1, .Label = "Server name", .Value = _profile.ServerName})
             rows.Add(New ProfileFieldRow With {.Ordinal = 2, .Label = "Server address", .Value = _profile.ServerAddress})
-            rows.Add(New ProfileFieldRow With {.Ordinal = 3, .Label = "VPN type", .Value = "IKEv2"})
+            ' Must follow the selected protocol, not assume IKEv2.
+            rows.Add(New ProfileFieldRow With {.Ordinal = 3, .Label = "VPN type", .Value = _profile.VpnTypeValue})
             rows.Add(New ProfileFieldRow With {.Ordinal = 4, .Label = "Type of sign-in info", .Value = "User name and password"})
             rows.Add(New ProfileFieldRow With {.Ordinal = 5, .Label = "User name", .Value = Username})
             rows.Add(New ProfileFieldRow With {.Ordinal = 6, .Label = "Password", .Value = passwordValue, .IsSecret = True})
