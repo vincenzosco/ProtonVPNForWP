@@ -1,0 +1,1418 @@
+{
+ "_meta": {
+  "generatedUtc": "2026-10-09T13:48:49Z",
+  "schema": "proton-vpn-wp81/offline-catalogue/1",
+  "note": "Curated offline snapshot in the shape of Proton's /vpn/logicals response. Not a live API dump. The app prefers live data whenever the account API answers and labels this source as Offline."
+ },
+ "Code": 1000,
+ "LogicalServers": [
+  {
+   "ID": "arbue01",
+   "Name": "AR-BUE#1",
+   "Domain": "node-ar-bue-01.protonvpn.net",
+   "Status": 1,
+   "Load": 27,
+   "Tier": 2,
+   "Features": 28,
+   "City": "Buenos Aires",
+   "Country": "Argentina",
+   "ExitCountry": "AR",
+   "Servers": [
+    {
+     "ID": "arbue01-01",
+     "EntryIP": "185.159.1.81",
+     "ExitIP": "185.159.1.81",
+     "Domain": "node-ar-bue-01.protonvpn.net",
+     "Label": "BUE",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "ausyd01",
+   "Name": "AU-SYD#1",
+   "Domain": "node-au-syd-01.protonvpn.net",
+   "Status": 1,
+   "Load": 67,
+   "Tier": 2,
+   "Features": 28,
+   "City": "Sydney",
+   "Country": "Australia",
+   "ExitCountry": "AU",
+   "Servers": [
+    {
+     "ID": "ausyd01-01",
+     "EntryIP": "185.159.1.20",
+     "ExitIP": "185.159.1.20",
+     "Domain": "node-au-syd-01.protonvpn.net",
+     "Label": "SYD",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "ausyd02",
+   "Name": "AU-SYD#2",
+   "Domain": "node-au-syd-02.protonvpn.net",
+   "Status": 1,
+   "Load": 23,
+   "Tier": 2,
+   "Features": 20,
+   "City": "Melbourne",
+   "Country": "Australia",
+   "ExitCountry": "AU",
+   "Servers": [
+    {
+     "ID": "ausyd02-01",
+     "EntryIP": "185.159.2.173",
+     "ExitIP": "185.159.2.173",
+     "Domain": "node-au-syd-02.protonvpn.net",
+     "Label": "SYD",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "atvie01",
+   "Name": "AT-VIE#1",
+   "Domain": "node-at-vie-01.protonvpn.net",
+   "Status": 1,
+   "Load": 67,
+   "Tier": 2,
+   "Features": 28,
+   "City": "Vienna",
+   "Country": "Austria",
+   "ExitCountry": "AT",
+   "Servers": [
+    {
+     "ID": "atvie01-01",
+     "EntryIP": "185.159.1.176",
+     "ExitIP": "185.159.1.176",
+     "Domain": "node-at-vie-01.protonvpn.net",
+     "Label": "VIE",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "bebru01",
+   "Name": "BE-BRU#1",
+   "Domain": "node-be-bru-01.protonvpn.net",
+   "Status": 1,
+   "Load": 81,
+   "Tier": 2,
+   "Features": 28,
+   "City": "Brussels",
+   "Country": "Belgium",
+   "ExitCountry": "BE",
+   "Servers": [
+    {
+     "ID": "bebru01-01",
+     "EntryIP": "185.159.1.150",
+     "ExitIP": "185.159.1.150",
+     "Domain": "node-be-bru-01.protonvpn.net",
+     "Label": "BRU",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "brsao01",
+   "Name": "BR-SAO#1",
+   "Domain": "node-br-sao-01.protonvpn.net",
+   "Status": 1,
+   "Load": 88,
+   "Tier": 2,
+   "Features": 28,
+   "City": "Sao Paulo",
+   "Country": "Brazil",
+   "ExitCountry": "BR",
+   "Servers": [
+    {
+     "ID": "brsao01-01",
+     "EntryIP": "185.159.1.80",
+     "ExitIP": "185.159.1.80",
+     "Domain": "node-br-sao-01.protonvpn.net",
+     "Label": "SAO",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "brsao02",
+   "Name": "BR-SAO#2",
+   "Domain": "node-br-sao-02.protonvpn.net",
+   "Status": 1,
+   "Load": 58,
+   "Tier": 2,
+   "Features": 20,
+   "City": "Rio de Janeiro",
+   "Country": "Brazil",
+   "ExitCountry": "BR",
+   "Servers": [
+    {
+     "ID": "brsao02-01",
+     "EntryIP": "185.159.2.113",
+     "ExitIP": "185.159.2.113",
+     "Domain": "node-br-sao-02.protonvpn.net",
+     "Label": "SAO",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "bgsof01",
+   "Name": "BG-SOF#1",
+   "Domain": "node-bg-sof-01.protonvpn.net",
+   "Status": 1,
+   "Load": 60,
+   "Tier": 2,
+   "Features": 28,
+   "City": "Sofia",
+   "Country": "Bulgaria",
+   "ExitCountry": "BG",
+   "Servers": [
+    {
+     "ID": "bgsof01-01",
+     "EntryIP": "185.159.1.26",
+     "ExitIP": "185.159.1.26",
+     "Domain": "node-bg-sof-01.protonvpn.net",
+     "Label": "SOF",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "cator01",
+   "Name": "CA-TOR#1",
+   "Domain": "node-ca-tor-01.protonvpn.net",
+   "Status": 1,
+   "Load": 74,
+   "Tier": 2,
+   "Features": 28,
+   "City": "Toronto",
+   "Country": "Canada",
+   "ExitCountry": "CA",
+   "Servers": [
+    {
+     "ID": "cator01-01",
+     "EntryIP": "185.159.1.43",
+     "ExitIP": "185.159.1.43",
+     "Domain": "node-ca-tor-01.protonvpn.net",
+     "Label": "TOR",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "cator02",
+   "Name": "CA-TOR#2",
+   "Domain": "node-ca-tor-02.protonvpn.net",
+   "Status": 1,
+   "Load": 16,
+   "Tier": 2,
+   "Features": 20,
+   "City": "Montreal",
+   "Country": "Canada",
+   "ExitCountry": "CA",
+   "Servers": [
+    {
+     "ID": "cator02-01",
+     "EntryIP": "185.159.2.66",
+     "ExitIP": "185.159.2.66",
+     "Domain": "node-ca-tor-02.protonvpn.net",
+     "Label": "TOR",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "cator03",
+   "Name": "CA-TOR#3",
+   "Domain": "node-ca-tor-03.protonvpn.net",
+   "Status": 1,
+   "Load": 40,
+   "Tier": 2,
+   "Features": 20,
+   "City": "Vancouver",
+   "Country": "Canada",
+   "ExitCountry": "CA",
+   "Servers": [
+    {
+     "ID": "cator03-01",
+     "EntryIP": "185.159.3.146",
+     "ExitIP": "185.159.3.146",
+     "Domain": "node-ca-tor-03.protonvpn.net",
+     "Label": "TOR",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "clscl01",
+   "Name": "CL-SCL#1",
+   "Domain": "node-cl-scl-01.protonvpn.net",
+   "Status": 1,
+   "Load": 81,
+   "Tier": 2,
+   "Features": 28,
+   "City": "Santiago",
+   "Country": "Chile",
+   "ExitCountry": "CL",
+   "Servers": [
+    {
+     "ID": "clscl01-01",
+     "EntryIP": "185.159.1.118",
+     "ExitIP": "185.159.1.118",
+     "Domain": "node-cl-scl-01.protonvpn.net",
+     "Label": "SCL",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "cobog01",
+   "Name": "CO-BOG#1",
+   "Domain": "node-co-bog-01.protonvpn.net",
+   "Status": 1,
+   "Load": 67,
+   "Tier": 2,
+   "Features": 28,
+   "City": "Bogota",
+   "Country": "Colombia",
+   "ExitCountry": "CO",
+   "Servers": [
+    {
+     "ID": "cobog01-01",
+     "EntryIP": "185.159.1.188",
+     "ExitIP": "185.159.1.188",
+     "Domain": "node-co-bog-01.protonvpn.net",
+     "Label": "BOG",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "hrzag01",
+   "Name": "HR-ZAG#1",
+   "Domain": "node-hr-zag-01.protonvpn.net",
+   "Status": 1,
+   "Load": 67,
+   "Tier": 2,
+   "Features": 28,
+   "City": "Zagreb",
+   "Country": "Croatia",
+   "ExitCountry": "HR",
+   "Servers": [
+    {
+     "ID": "hrzag01-01",
+     "EntryIP": "185.159.1.127",
+     "ExitIP": "185.159.1.127",
+     "Domain": "node-hr-zag-01.protonvpn.net",
+     "Label": "ZAG",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "czprg01",
+   "Name": "CZ-PRG#1",
+   "Domain": "node-cz-prg-01.protonvpn.net",
+   "Status": 1,
+   "Load": 67,
+   "Tier": 2,
+   "Features": 28,
+   "City": "Prague",
+   "Country": "Czechia",
+   "ExitCountry": "CZ",
+   "Servers": [
+    {
+     "ID": "czprg01-01",
+     "EntryIP": "185.159.1.113",
+     "ExitIP": "185.159.1.113",
+     "Domain": "node-cz-prg-01.protonvpn.net",
+     "Label": "PRG",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "dkcph01",
+   "Name": "DK-CPH#1",
+   "Domain": "node-dk-cph-01.protonvpn.net",
+   "Status": 1,
+   "Load": 13,
+   "Tier": 2,
+   "Features": 28,
+   "City": "Copenhagen",
+   "Country": "Denmark",
+   "ExitCountry": "DK",
+   "Servers": [
+    {
+     "ID": "dkcph01-01",
+     "EntryIP": "185.159.1.144",
+     "ExitIP": "185.159.1.144",
+     "Domain": "node-dk-cph-01.protonvpn.net",
+     "Label": "CPH",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "eetll01",
+   "Name": "EE-TLL#1",
+   "Domain": "node-ee-tll-01.protonvpn.net",
+   "Status": 1,
+   "Load": 74,
+   "Tier": 2,
+   "Features": 28,
+   "City": "Tallinn",
+   "Country": "Estonia",
+   "ExitCountry": "EE",
+   "Servers": [
+    {
+     "ID": "eetll01-01",
+     "EntryIP": "185.159.1.49",
+     "ExitIP": "185.159.1.49",
+     "Domain": "node-ee-tll-01.protonvpn.net",
+     "Label": "TLL",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "fihel01",
+   "Name": "FI-HEL#1",
+   "Domain": "node-fi-hel-01.protonvpn.net",
+   "Status": 1,
+   "Load": 81,
+   "Tier": 2,
+   "Features": 28,
+   "City": "Helsinki",
+   "Country": "Finland",
+   "ExitCountry": "FI",
+   "Servers": [
+    {
+     "ID": "fihel01-01",
+     "EntryIP": "185.159.1.103",
+     "ExitIP": "185.159.1.103",
+     "Domain": "node-fi-hel-01.protonvpn.net",
+     "Label": "HEL",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "frpar01",
+   "Name": "FR-PAR#1",
+   "Domain": "node-fr-par-01.protonvpn.net",
+   "Status": 1,
+   "Load": 60,
+   "Tier": 2,
+   "Features": 28,
+   "City": "Paris",
+   "Country": "France",
+   "ExitCountry": "FR",
+   "Servers": [
+    {
+     "ID": "frpar01-01",
+     "EntryIP": "185.159.1.138",
+     "ExitIP": "185.159.1.138",
+     "Domain": "node-fr-par-01.protonvpn.net",
+     "Label": "PAR",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "frpar02",
+   "Name": "FR-PAR#2",
+   "Domain": "node-fr-par-02.protonvpn.net",
+   "Status": 1,
+   "Load": 23,
+   "Tier": 2,
+   "Features": 20,
+   "City": "Marseille",
+   "Country": "France",
+   "ExitCountry": "FR",
+   "Servers": [
+    {
+     "ID": "frpar02-01",
+     "EntryIP": "185.159.2.179",
+     "ExitIP": "185.159.2.179",
+     "Domain": "node-fr-par-02.protonvpn.net",
+     "Label": "PAR",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "defra01",
+   "Name": "DE-FRA#1",
+   "Domain": "node-de-fra-01.protonvpn.net",
+   "Status": 1,
+   "Load": 88,
+   "Tier": 2,
+   "Features": 28,
+   "City": "Frankfurt",
+   "Country": "Germany",
+   "ExitCountry": "DE",
+   "Servers": [
+    {
+     "ID": "defra01-01",
+     "EntryIP": "185.159.1.27",
+     "ExitIP": "185.159.1.27",
+     "Domain": "node-de-fra-01.protonvpn.net",
+     "Label": "FRA",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "defra02",
+   "Name": "DE-FRA#2",
+   "Domain": "node-de-fra-02.protonvpn.net",
+   "Status": 1,
+   "Load": 84,
+   "Tier": 2,
+   "Features": 20,
+   "City": "Berlin",
+   "Country": "Germany",
+   "ExitCountry": "DE",
+   "Servers": [
+    {
+     "ID": "defra02-01",
+     "EntryIP": "185.159.2.42",
+     "ExitIP": "185.159.2.42",
+     "Domain": "node-de-fra-02.protonvpn.net",
+     "Label": "FRA",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "grath01",
+   "Name": "GR-ATH#1",
+   "Domain": "node-gr-ath-01.protonvpn.net",
+   "Status": 1,
+   "Load": 67,
+   "Tier": 2,
+   "Features": 28,
+   "City": "Athens",
+   "Country": "Greece",
+   "ExitCountry": "GR",
+   "Servers": [
+    {
+     "ID": "grath01-01",
+     "EntryIP": "185.159.1.178",
+     "ExitIP": "185.159.1.178",
+     "Domain": "node-gr-ath-01.protonvpn.net",
+     "Label": "ATH",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "hkhkg01",
+   "Name": "HK-HKG#1",
+   "Domain": "node-hk-hkg-01.protonvpn.net",
+   "Status": 1,
+   "Load": 88,
+   "Tier": 2,
+   "Features": 28,
+   "City": "Hong Kong",
+   "Country": "Hong Kong",
+   "ExitCountry": "HK",
+   "Servers": [
+    {
+     "ID": "hkhkg01-01",
+     "EntryIP": "185.159.1.83",
+     "ExitIP": "185.159.1.83",
+     "Domain": "node-hk-hkg-01.protonvpn.net",
+     "Label": "HKG",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "hubud01",
+   "Name": "HU-BUD#1",
+   "Domain": "node-hu-bud-01.protonvpn.net",
+   "Status": 1,
+   "Load": 81,
+   "Tier": 2,
+   "Features": 28,
+   "City": "Budapest",
+   "Country": "Hungary",
+   "ExitCountry": "HU",
+   "Servers": [
+    {
+     "ID": "hubud01-01",
+     "EntryIP": "185.159.1.66",
+     "ExitIP": "185.159.1.66",
+     "Domain": "node-hu-bud-01.protonvpn.net",
+     "Label": "BUD",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "isrek01",
+   "Name": "IS-REK#1",
+   "Domain": "node-is-rek-01.protonvpn.net",
+   "Status": 1,
+   "Load": 88,
+   "Tier": 2,
+   "Features": 31,
+   "City": "Reykjavik",
+   "Country": "Iceland",
+   "ExitCountry": "IS",
+   "Servers": [
+    {
+     "ID": "isrek01-01",
+     "EntryIP": "185.159.1.177",
+     "ExitIP": "185.159.1.177",
+     "Domain": "node-is-rek-01.protonvpn.net",
+     "Label": "REK",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "inbom01",
+   "Name": "IN-BOM#1",
+   "Domain": "node-in-bom-01.protonvpn.net",
+   "Status": 1,
+   "Load": 67,
+   "Tier": 2,
+   "Features": 28,
+   "City": "Mumbai",
+   "Country": "India",
+   "ExitCountry": "IN",
+   "Servers": [
+    {
+     "ID": "inbom01-01",
+     "EntryIP": "185.159.1.212",
+     "ExitIP": "185.159.1.212",
+     "Domain": "node-in-bom-01.protonvpn.net",
+     "Label": "BOM",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "inbom02",
+   "Name": "IN-BOM#2",
+   "Domain": "node-in-bom-02.protonvpn.net",
+   "Status": 1,
+   "Load": 77,
+   "Tier": 2,
+   "Features": 20,
+   "City": "Delhi",
+   "Country": "India",
+   "ExitCountry": "IN",
+   "Servers": [
+    {
+     "ID": "inbom02-01",
+     "EntryIP": "185.159.2.85",
+     "ExitIP": "185.159.2.85",
+     "Domain": "node-in-bom-02.protonvpn.net",
+     "Label": "BOM",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "iedub01",
+   "Name": "IE-DUB#1",
+   "Domain": "node-ie-dub-01.protonvpn.net",
+   "Status": 1,
+   "Load": 67,
+   "Tier": 2,
+   "Features": 28,
+   "City": "Dublin",
+   "Country": "Ireland",
+   "ExitCountry": "IE",
+   "Servers": [
+    {
+     "ID": "iedub01-01",
+     "EntryIP": "185.159.1.47",
+     "ExitIP": "185.159.1.47",
+     "Domain": "node-ie-dub-01.protonvpn.net",
+     "Label": "DUB",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "iltlv01",
+   "Name": "IL-TLV#1",
+   "Domain": "node-il-tlv-01.protonvpn.net",
+   "Status": 1,
+   "Load": 81,
+   "Tier": 2,
+   "Features": 28,
+   "City": "Tel Aviv",
+   "Country": "Israel",
+   "ExitCountry": "IL",
+   "Servers": [
+    {
+     "ID": "iltlv01-01",
+     "EntryIP": "185.159.1.67",
+     "ExitIP": "185.159.1.67",
+     "Domain": "node-il-tlv-01.protonvpn.net",
+     "Label": "TLV",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "itmil01",
+   "Name": "IT-MIL#1",
+   "Domain": "node-it-mil-01.protonvpn.net",
+   "Status": 1,
+   "Load": 60,
+   "Tier": 2,
+   "Features": 28,
+   "City": "Milan",
+   "Country": "Italy",
+   "ExitCountry": "IT",
+   "Servers": [
+    {
+     "ID": "itmil01-01",
+     "EntryIP": "185.159.1.86",
+     "ExitIP": "185.159.1.86",
+     "Domain": "node-it-mil-01.protonvpn.net",
+     "Label": "MIL",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "itmil02",
+   "Name": "IT-MIL#2",
+   "Domain": "node-it-mil-02.protonvpn.net",
+   "Status": 1,
+   "Load": 70,
+   "Tier": 2,
+   "Features": 20,
+   "City": "Rome",
+   "Country": "Italy",
+   "ExitCountry": "IT",
+   "Servers": [
+    {
+     "ID": "itmil02-01",
+     "EntryIP": "185.159.2.55",
+     "ExitIP": "185.159.2.55",
+     "Domain": "node-it-mil-02.protonvpn.net",
+     "Label": "MIL",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "jptok01",
+   "Name": "JP-TOK#1",
+   "Domain": "node-jp-tok-01.protonvpn.net",
+   "Status": 1,
+   "Load": 60,
+   "Tier": 0,
+   "Features": 28,
+   "City": "Tokyo",
+   "Country": "Japan",
+   "ExitCountry": "JP",
+   "Servers": [
+    {
+     "ID": "jptok01-01",
+     "EntryIP": "185.159.1.53",
+     "ExitIP": "185.159.1.53",
+     "Domain": "node-jp-tok-01.protonvpn.net",
+     "Label": "TOK",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "jptok02",
+   "Name": "JP-TOK#2",
+   "Domain": "node-jp-tok-02.protonvpn.net",
+   "Status": 1,
+   "Load": 77,
+   "Tier": 0,
+   "Features": 20,
+   "City": "Osaka",
+   "Country": "Japan",
+   "ExitCountry": "JP",
+   "Servers": [
+    {
+     "ID": "jptok02-01",
+     "EntryIP": "185.159.2.124",
+     "ExitIP": "185.159.2.124",
+     "Domain": "node-jp-tok-02.protonvpn.net",
+     "Label": "TOK",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "lvrix01",
+   "Name": "LV-RIX#1",
+   "Domain": "node-lv-rix-01.protonvpn.net",
+   "Status": 1,
+   "Load": 53,
+   "Tier": 2,
+   "Features": 28,
+   "City": "Riga",
+   "Country": "Latvia",
+   "ExitCountry": "LV",
+   "Servers": [
+    {
+     "ID": "lvrix01-01",
+     "EntryIP": "185.159.1.27",
+     "ExitIP": "185.159.1.27",
+     "Domain": "node-lv-rix-01.protonvpn.net",
+     "Label": "RIX",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "ltvno01",
+   "Name": "LT-VNO#1",
+   "Domain": "node-lt-vno-01.protonvpn.net",
+   "Status": 1,
+   "Load": 74,
+   "Tier": 2,
+   "Features": 28,
+   "City": "Vilnius",
+   "Country": "Lithuania",
+   "ExitCountry": "LT",
+   "Servers": [
+    {
+     "ID": "ltvno01-01",
+     "EntryIP": "185.159.1.109",
+     "ExitIP": "185.159.1.109",
+     "Domain": "node-lt-vno-01.protonvpn.net",
+     "Label": "VNO",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "lulux01",
+   "Name": "LU-LUX#1",
+   "Domain": "node-lu-lux-01.protonvpn.net",
+   "Status": 1,
+   "Load": 13,
+   "Tier": 2,
+   "Features": 28,
+   "City": "Luxembourg",
+   "Country": "Luxembourg",
+   "ExitCountry": "LU",
+   "Servers": [
+    {
+     "ID": "lulux01-01",
+     "EntryIP": "185.159.1.212",
+     "ExitIP": "185.159.1.212",
+     "Domain": "node-lu-lux-01.protonvpn.net",
+     "Label": "LUX",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "mxmex01",
+   "Name": "MX-MEX#1",
+   "Domain": "node-mx-mex-01.protonvpn.net",
+   "Status": 1,
+   "Load": 20,
+   "Tier": 2,
+   "Features": 28,
+   "City": "Mexico City",
+   "Country": "Mexico",
+   "ExitCountry": "MX",
+   "Servers": [
+    {
+     "ID": "mxmex01-01",
+     "EntryIP": "185.159.1.44",
+     "ExitIP": "185.159.1.44",
+     "Domain": "node-mx-mex-01.protonvpn.net",
+     "Label": "MEX",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "mdkiv01",
+   "Name": "MD-KIV#1",
+   "Domain": "node-md-kiv-01.protonvpn.net",
+   "Status": 1,
+   "Load": 81,
+   "Tier": 2,
+   "Features": 28,
+   "City": "Chisinau",
+   "Country": "Moldova",
+   "ExitCountry": "MD",
+   "Servers": [
+    {
+     "ID": "mdkiv01-01",
+     "EntryIP": "185.159.1.102",
+     "ExitIP": "185.159.1.102",
+     "Domain": "node-md-kiv-01.protonvpn.net",
+     "Label": "KIV",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "nlams01",
+   "Name": "NL-AMS#1",
+   "Domain": "node-nl-ams-01.protonvpn.net",
+   "Status": 1,
+   "Load": 88,
+   "Tier": 0,
+   "Features": 28,
+   "City": "Amsterdam",
+   "Country": "Netherlands",
+   "ExitCountry": "NL",
+   "Servers": [
+    {
+     "ID": "nlams01-01",
+     "EntryIP": "185.159.1.88",
+     "ExitIP": "185.159.1.88",
+     "Domain": "node-nl-ams-01.protonvpn.net",
+     "Label": "AMS",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "nlams02",
+   "Name": "NL-AMS#2",
+   "Domain": "node-nl-ams-02.protonvpn.net",
+   "Status": 1,
+   "Load": 23,
+   "Tier": 0,
+   "Features": 20,
+   "City": "Rotterdam",
+   "Country": "Netherlands",
+   "ExitCountry": "NL",
+   "Servers": [
+    {
+     "ID": "nlams02-01",
+     "EntryIP": "185.159.2.177",
+     "ExitIP": "185.159.2.177",
+     "Domain": "node-nl-ams-02.protonvpn.net",
+     "Label": "AMS",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "nzakl01",
+   "Name": "NZ-AKL#1",
+   "Domain": "node-nz-akl-01.protonvpn.net",
+   "Status": 1,
+   "Load": 81,
+   "Tier": 2,
+   "Features": 28,
+   "City": "Auckland",
+   "Country": "New Zealand",
+   "ExitCountry": "NZ",
+   "Servers": [
+    {
+     "ID": "nzakl01-01",
+     "EntryIP": "185.159.1.218",
+     "ExitIP": "185.159.1.218",
+     "Domain": "node-nz-akl-01.protonvpn.net",
+     "Label": "AKL",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "noosl01",
+   "Name": "NO-OSL#1",
+   "Domain": "node-no-osl-01.protonvpn.net",
+   "Status": 1,
+   "Load": 53,
+   "Tier": 2,
+   "Features": 28,
+   "City": "Oslo",
+   "Country": "Norway",
+   "ExitCountry": "NO",
+   "Servers": [
+    {
+     "ID": "noosl01-01",
+     "EntryIP": "185.159.1.131",
+     "ExitIP": "185.159.1.131",
+     "Domain": "node-no-osl-01.protonvpn.net",
+     "Label": "OSL",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "plwaw01",
+   "Name": "PL-WAW#1",
+   "Domain": "node-pl-waw-01.protonvpn.net",
+   "Status": 1,
+   "Load": 67,
+   "Tier": 0,
+   "Features": 28,
+   "City": "Warsaw",
+   "Country": "Poland",
+   "ExitCountry": "PL",
+   "Servers": [
+    {
+     "ID": "plwaw01-01",
+     "EntryIP": "185.159.1.177",
+     "ExitIP": "185.159.1.177",
+     "Domain": "node-pl-waw-01.protonvpn.net",
+     "Label": "WAW",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "ptlis01",
+   "Name": "PT-LIS#1",
+   "Domain": "node-pt-lis-01.protonvpn.net",
+   "Status": 1,
+   "Load": 67,
+   "Tier": 2,
+   "Features": 28,
+   "City": "Lisbon",
+   "Country": "Portugal",
+   "ExitCountry": "PT",
+   "Servers": [
+    {
+     "ID": "ptlis01-01",
+     "EntryIP": "185.159.1.206",
+     "ExitIP": "185.159.1.206",
+     "Domain": "node-pt-lis-01.protonvpn.net",
+     "Label": "LIS",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "robuh01",
+   "Name": "RO-BUH#1",
+   "Domain": "node-ro-buh-01.protonvpn.net",
+   "Status": 1,
+   "Load": 88,
+   "Tier": 0,
+   "Features": 28,
+   "City": "Bucharest",
+   "Country": "Romania",
+   "ExitCountry": "RO",
+   "Servers": [
+    {
+     "ID": "robuh01-01",
+     "EntryIP": "185.159.1.98",
+     "ExitIP": "185.159.1.98",
+     "Domain": "node-ro-buh-01.protonvpn.net",
+     "Label": "BUH",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "rsbeg01",
+   "Name": "RS-BEG#1",
+   "Domain": "node-rs-beg-01.protonvpn.net",
+   "Status": 1,
+   "Load": 81,
+   "Tier": 2,
+   "Features": 28,
+   "City": "Belgrade",
+   "Country": "Serbia",
+   "ExitCountry": "RS",
+   "Servers": [
+    {
+     "ID": "rsbeg01-01",
+     "EntryIP": "185.159.1.57",
+     "ExitIP": "185.159.1.57",
+     "Domain": "node-rs-beg-01.protonvpn.net",
+     "Label": "BEG",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "sgsin01",
+   "Name": "SG-SIN#1",
+   "Domain": "node-sg-sin-01.protonvpn.net",
+   "Status": 1,
+   "Load": 88,
+   "Tier": 2,
+   "Features": 28,
+   "City": "Singapore",
+   "Country": "Singapore",
+   "ExitCountry": "SG",
+   "Servers": [
+    {
+     "ID": "sgsin01-01",
+     "EntryIP": "185.159.1.69",
+     "ExitIP": "185.159.1.69",
+     "Domain": "node-sg-sin-01.protonvpn.net",
+     "Label": "SIN",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "skbra01",
+   "Name": "SK-BRA#1",
+   "Domain": "node-sk-bra-01.protonvpn.net",
+   "Status": 1,
+   "Load": 13,
+   "Tier": 2,
+   "Features": 28,
+   "City": "Bratislava",
+   "Country": "Slovakia",
+   "ExitCountry": "SK",
+   "Servers": [
+    {
+     "ID": "skbra01-01",
+     "EntryIP": "185.159.1.216",
+     "ExitIP": "185.159.1.216",
+     "Domain": "node-sk-bra-01.protonvpn.net",
+     "Label": "BRA",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "zajnb01",
+   "Name": "ZA-JNB#1",
+   "Domain": "node-za-jnb-01.protonvpn.net",
+   "Status": 1,
+   "Load": 27,
+   "Tier": 2,
+   "Features": 28,
+   "City": "Johannesburg",
+   "Country": "South Africa",
+   "ExitCountry": "ZA",
+   "Servers": [
+    {
+     "ID": "zajnb01-01",
+     "EntryIP": "185.159.1.87",
+     "ExitIP": "185.159.1.87",
+     "Domain": "node-za-jnb-01.protonvpn.net",
+     "Label": "JNB",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "esmad01",
+   "Name": "ES-MAD#1",
+   "Domain": "node-es-mad-01.protonvpn.net",
+   "Status": 1,
+   "Load": 67,
+   "Tier": 2,
+   "Features": 28,
+   "City": "Madrid",
+   "Country": "Spain",
+   "ExitCountry": "ES",
+   "Servers": [
+    {
+     "ID": "esmad01-01",
+     "EntryIP": "185.159.1.154",
+     "ExitIP": "185.159.1.154",
+     "Domain": "node-es-mad-01.protonvpn.net",
+     "Label": "MAD",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "esmad02",
+   "Name": "ES-MAD#2",
+   "Domain": "node-es-mad-02.protonvpn.net",
+   "Status": 1,
+   "Load": 23,
+   "Tier": 2,
+   "Features": 20,
+   "City": "Barcelona",
+   "Country": "Spain",
+   "ExitCountry": "ES",
+   "Servers": [
+    {
+     "ID": "esmad02-01",
+     "EntryIP": "185.159.2.59",
+     "ExitIP": "185.159.2.59",
+     "Domain": "node-es-mad-02.protonvpn.net",
+     "Label": "MAD",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "sesto01",
+   "Name": "SE-STO#1",
+   "Domain": "node-se-sto-01.protonvpn.net",
+   "Status": 1,
+   "Load": 88,
+   "Tier": 2,
+   "Features": 31,
+   "City": "Stockholm",
+   "Country": "Sweden",
+   "ExitCountry": "SE",
+   "Servers": [
+    {
+     "ID": "sesto01-01",
+     "EntryIP": "185.159.1.209",
+     "ExitIP": "185.159.1.209",
+     "Domain": "node-se-sto-01.protonvpn.net",
+     "Label": "STO",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "chzrh01",
+   "Name": "CH-ZRH#1",
+   "Domain": "node-ch-zrh-01.protonvpn.net",
+   "Status": 1,
+   "Load": 67,
+   "Tier": 2,
+   "Features": 31,
+   "City": "Zurich",
+   "Country": "Switzerland",
+   "ExitCountry": "CH",
+   "Servers": [
+    {
+     "ID": "chzrh01-01",
+     "EntryIP": "185.159.1.158",
+     "ExitIP": "185.159.1.158",
+     "Domain": "node-ch-zrh-01.protonvpn.net",
+     "Label": "ZRH",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "chzrh02",
+   "Name": "CH-ZRH#2",
+   "Domain": "node-ch-zrh-02.protonvpn.net",
+   "Status": 1,
+   "Load": 84,
+   "Tier": 2,
+   "Features": 20,
+   "City": "Geneva",
+   "Country": "Switzerland",
+   "ExitCountry": "CH",
+   "Servers": [
+    {
+     "ID": "chzrh02-01",
+     "EntryIP": "185.159.2.175",
+     "ExitIP": "185.159.2.175",
+     "Domain": "node-ch-zrh-02.protonvpn.net",
+     "Label": "ZRH",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "twtpe01",
+   "Name": "TW-TPE#1",
+   "Domain": "node-tw-tpe-01.protonvpn.net",
+   "Status": 1,
+   "Load": 67,
+   "Tier": 2,
+   "Features": 28,
+   "City": "Taipei",
+   "Country": "Taiwan",
+   "ExitCountry": "TW",
+   "Servers": [
+    {
+     "ID": "twtpe01-01",
+     "EntryIP": "185.159.1.176",
+     "ExitIP": "185.159.1.176",
+     "Domain": "node-tw-tpe-01.protonvpn.net",
+     "Label": "TPE",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "uakyv01",
+   "Name": "UA-KYV#1",
+   "Domain": "node-ua-kyv-01.protonvpn.net",
+   "Status": 1,
+   "Load": 53,
+   "Tier": 2,
+   "Features": 28,
+   "City": "Kyiv",
+   "Country": "Ukraine",
+   "ExitCountry": "UA",
+   "Servers": [
+    {
+     "ID": "uakyv01-01",
+     "EntryIP": "185.159.1.78",
+     "ExitIP": "185.159.1.78",
+     "Domain": "node-ua-kyv-01.protonvpn.net",
+     "Label": "KYV",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "aedxb01",
+   "Name": "AE-DXB#1",
+   "Domain": "node-ae-dxb-01.protonvpn.net",
+   "Status": 1,
+   "Load": 60,
+   "Tier": 2,
+   "Features": 28,
+   "City": "Dubai",
+   "Country": "United Arab Emirates",
+   "ExitCountry": "AE",
+   "Servers": [
+    {
+     "ID": "aedxb01-01",
+     "EntryIP": "185.159.1.198",
+     "ExitIP": "185.159.1.198",
+     "Domain": "node-ae-dxb-01.protonvpn.net",
+     "Label": "DXB",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "gblon01",
+   "Name": "GB-LON#1",
+   "Domain": "node-gb-lon-01.protonvpn.net",
+   "Status": 1,
+   "Load": 67,
+   "Tier": 2,
+   "Features": 28,
+   "City": "London",
+   "Country": "United Kingdom",
+   "ExitCountry": "GB",
+   "Servers": [
+    {
+     "ID": "gblon01-01",
+     "EntryIP": "185.159.1.45",
+     "ExitIP": "185.159.1.45",
+     "Domain": "node-gb-lon-01.protonvpn.net",
+     "Label": "LON",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "gblon02",
+   "Name": "GB-LON#2",
+   "Domain": "node-gb-lon-02.protonvpn.net",
+   "Status": 1,
+   "Load": 30,
+   "Tier": 2,
+   "Features": 20,
+   "City": "Manchester",
+   "Country": "United Kingdom",
+   "ExitCountry": "GB",
+   "Servers": [
+    {
+     "ID": "gblon02-01",
+     "EntryIP": "185.159.2.100",
+     "ExitIP": "185.159.2.100",
+     "Domain": "node-gb-lon-02.protonvpn.net",
+     "Label": "LON",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "usny01",
+   "Name": "US-NY#1",
+   "Domain": "node-us-ny-01.protonvpn.net",
+   "Status": 1,
+   "Load": 81,
+   "Tier": 0,
+   "Features": 28,
+   "City": "New York",
+   "Country": "United States",
+   "ExitCountry": "US",
+   "Servers": [
+    {
+     "ID": "usny01-01",
+     "EntryIP": "185.159.1.118",
+     "ExitIP": "185.159.1.118",
+     "Domain": "node-us-ny-01.protonvpn.net",
+     "Label": "NY",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "usny02",
+   "Name": "US-NY#2",
+   "Domain": "node-us-ny-02.protonvpn.net",
+   "Status": 1,
+   "Load": 37,
+   "Tier": 0,
+   "Features": 20,
+   "City": "Los Angeles",
+   "Country": "United States",
+   "ExitCountry": "US",
+   "Servers": [
+    {
+     "ID": "usny02-01",
+     "EntryIP": "185.159.2.79",
+     "ExitIP": "185.159.2.79",
+     "Domain": "node-us-ny-02.protonvpn.net",
+     "Label": "NY",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "usny03",
+   "Name": "US-NY#3",
+   "Domain": "node-us-ny-03.protonvpn.net",
+   "Status": 1,
+   "Load": 26,
+   "Tier": 0,
+   "Features": 20,
+   "City": "Chicago",
+   "Country": "United States",
+   "ExitCountry": "US",
+   "Servers": [
+    {
+     "ID": "usny03-01",
+     "EntryIP": "185.159.3.39",
+     "ExitIP": "185.159.3.39",
+     "Domain": "node-us-ny-03.protonvpn.net",
+     "Label": "NY",
+     "Status": 1
+    }
+   ]
+  },
+  {
+   "ID": "usny04",
+   "Name": "US-NY#4",
+   "Domain": "node-us-ny-04.protonvpn.net",
+   "Status": 1,
+   "Load": 29,
+   "Tier": 0,
+   "Features": 20,
+   "City": "Miami",
+   "Country": "United States",
+   "ExitCountry": "US",
+   "Servers": [
+    {
+     "ID": "usny04-01",
+     "EntryIP": "185.159.4.125",
+     "ExitIP": "185.159.4.125",
+     "Domain": "node-us-ny-04.protonvpn.net",
+     "Label": "NY",
+     "Status": 1
+    }
+   ]
+  }
+ ]
+}
