@@ -71,7 +71,21 @@ Namespace Models
     ''' <summary>A logical server ("US-NY#1") the user can pick.</summary>
     Public NotInheritable Class ProtonLogical
         Public Property Id As String
+        Private _name As String
+
+        ''' <summary>
+        ''' Coalesced because ServerDetailPage assigns this straight to a WinRT
+        ''' TextBlock, which throws on Nothing. The setter is unchanged, so JSON
+        ''' parsing and the server-list binding behave exactly as before.
+        ''' </summary>
         Public Property Name As String
+            Get
+                Return If(_name, String.Empty)
+            End Get
+            Set(value As String)
+                _name = value
+            End Set
+        End Property
         Public Property Domain As String
         Public Property City As String
         Public Property Country As String
@@ -146,9 +160,9 @@ Namespace Models
         ''' <summary>A human readable location, e.g. "New York, United States".</summary>
         Public ReadOnly Property LocationText As String
             Get
-                If String.IsNullOrEmpty(City) Then Return Country
-                If String.IsNullOrEmpty(Country) Then Return City
-                If String.Equals(City, Country, StringComparison.OrdinalIgnoreCase) Then Return Country
+                If String.IsNullOrEmpty(City) Then Return If(Country, String.Empty)
+                If String.IsNullOrEmpty(Country) Then Return If(City, String.Empty)
+                If String.Equals(City, Country, StringComparison.OrdinalIgnoreCase) Then Return If(Country, String.Empty)
                 Return City & ", " & Country
             End Get
         End Property
