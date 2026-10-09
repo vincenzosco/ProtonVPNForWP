@@ -27,6 +27,8 @@ Namespace Services
         Private _pendingUid As String
         ''' <summary>The server proof that exchange must be validated against.</summary>
         Private _pendingServerProof As Byte()
+        ''' <summary>Set when the restored session has expired and still needs renewing.</summary>
+        Private _needsRefresh As Boolean
 
         Friend Sub New(api As ProtonApiClient, random As IRandomSource, vault As CredentialVault)
             _api = api
@@ -188,15 +190,39 @@ Namespace Services
         End Function
 
         ''' <summary>
-        ''' Restores a stored session, refreshing it first when its lifetime has run
-        ''' out. Without this an expired token would be used until every call failed
-        ''' and the app silently dropped to the bundled catalogue.
+        ''' Restores a stored session. Deliberately performs no network I/O: this runs
+        ''' on the startup path, and waiting here is what kept the app on the splash
+        ''' screen until an HTTP timeout expired. Expiry is recorded instead, and the
+        ''' renewal happens in <see cref="RefreshInBackgroundAsync"/> once the UI is up.
         ''' </summary>
         Friend Async Function RestoreAsync() As Task(Of ProtonSession)
+            Log.Info("restore: reading the stored session")
             Dim stored As ProtonSession = Await _vault.LoadSessionAsync()
             If stored Is Nothing OrElse Not stored.IsAuthenticated Then Return Nothing
 
-            If stored.HasExpired AndAlso Not String.IsNullOrEmpty(stored.RefreshToken) Then
+            _needsRefresh = stored.HasExpired AndAlso Not String.IsNullOrEmpty(stored.RefreshToken)
+            If _needsRefresh Then
+                Log.Info("restore: the stored session has expired; renewal deferred until the UI is up")
+            End If
+
+            _api.UserId = stored.UserId
+            _api.AccessToken = stored.AccessToken
+            Return stored
+        End Function
+
+        ''' <summary>
+        ''' Renews an expired stored session. The shell calls this after the first page
+        ''' is on screen, so the round trip is never on the path to the first frame.
+        ''' </summary>
+        Friend Async Function RefreshInBackgroundAsync() As Task
+            If Not _needsRefresh Then Return
+            _needsRefresh = False
+
+            Try
+                Dim stored As ProtonSession = Await _vault.LoadSessionAsync()
+                If stored Is Nothing OrElse Not stored.IsAuthenticated Then Return
+
+                Log.Info("restore: renewing the expired session")
                 Dim refreshed As ApiResult(Of JsonObject) = Await _api.RefreshAsync(stored.UserId, stored.RefreshToken)
                 If refreshed.Ok Then
                     Dim renewed As ProtonSession = ParseSession(refreshed.Value, stored.Username)
@@ -206,21 +232,20 @@ Namespace Services
                         Await _vault.StoreSessionAsync(renewed)
                         _api.UserId = renewed.UserId
                         _api.AccessToken = renewed.AccessToken
-                        Log.Info("Refreshed an expired Proton session.")
-                        Return renewed
+                        Log.Info("restore: refreshed the expired session in the background")
+                        Return
                     End If
                 End If
-                Log.Warn("Could not refresh the stored session; using the existing token.")
-            End If
-
-            _api.UserId = stored.UserId
-            _api.AccessToken = stored.AccessToken
-            Return stored
+                Log.Warn("restore: could not refresh the stored session")
+            Catch ex As Exception
+                Log.Warn("restore: the background refresh failed: " & ex.Message)
+            End Try
         End Function
 
         Friend Sub SignOut()
             _api.UserId = Nothing
             _api.AccessToken = Nothing
+            _needsRefresh = False
             ClearPending()
             _vault.Clear()
         End Sub
