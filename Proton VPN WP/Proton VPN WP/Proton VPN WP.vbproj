@@ -112,6 +112,8 @@
     <Compile Include="Services\CryptoBytes.vb" />
     <Compile Include="Services\Json.vb" />
     <Compile Include="Services\Log.vb" />
+    <Compile Include="Services\LogFilePolicy.vb" />
+    <Compile Include="Services\LogStore.vb" />
     <Compile Include="Services\ProtonApiClient.vb" />
     <Compile Include="Services\ProtonAuthService.vb" />
     <Compile Include="Services\RandomSource.vb" />
