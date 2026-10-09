@@ -33,6 +33,12 @@ Namespace Views
             Dim password As String = PasswordEntry.Password
             Dim code As String = If(TwoFactorBox.Text, String.Empty)
 
+            ' The box is the only place a typed user name ever lives: the view model's
+            ' Username is seeded from a stored session and nowhere else, so without this
+            ' copy a filled-in form reached the service with an empty user name and was
+            ' rejected with "Enter your Proton username and password."
+            _viewModel.Username = UsernameBox.Text
+
             UpdateVisualState()
             Dim signedIn As Boolean = Await _viewModel.SignInAsync(password, code)
             UpdateVisualState()
