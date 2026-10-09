@@ -3,6 +3,7 @@ Imports System.Threading.Tasks
 Imports Proton_VPN_WP.Services
 Imports Windows.ApplicationModel.Activation
 Imports Windows.UI.Xaml
+Imports Windows.UI.Xaml.Controls
 
 Partial Public NotInheritable Class App
     Inherits Application
@@ -35,8 +36,14 @@ Partial Public NotInheritable Class App
         ' when the app will not start.
         Log.Info("startup: log file " & LogStore.FilePath())
 
-        Dim root As New MainPage()
-        Window.Current.Content = root
+        ' The shell page has to be navigated to, not merely assigned: Page.OnNavigatedTo
+        ' is raised by the Frame that navigates, so a page dropped straight into
+        ' Window.Current.Content never receives it. On the device that left RootFrame
+        ' empty forever -- the app rendered and showed nothing, and the same dead
+        ' handler was the only place the hardware back button got registered.
+        Dim shellHost As New Frame()
+        Window.Current.Content = shellHost
+        shellHost.Navigate(GetType(MainPage))
         Window.Current.Activate()
         Log.Info("startup: shell activated; restoring the stored session")
 
