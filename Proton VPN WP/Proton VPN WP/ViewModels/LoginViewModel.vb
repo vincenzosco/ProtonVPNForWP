@@ -17,7 +17,7 @@ Namespace ViewModels
 
         Friend Property Username As String
             Get
-                Return _username
+                Return If(_username, String.Empty)
             End Get
             Set(value As String)
                 SetProperty(_username, value, "Username")
@@ -35,7 +35,7 @@ Namespace ViewModels
 
         Friend Property ErrorMessage As String
             Get
-                Return _errorMessage
+                Return If(_errorMessage, String.Empty)
             End Get
             Set(value As String)
                 SetProperty(_errorMessage, value, "ErrorMessage")

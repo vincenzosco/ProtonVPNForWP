@@ -30,8 +30,10 @@ Namespace ViewModels
         End Property
 
         Friend Property StatusMessage As String
+            ' Coalesced because the views assign this straight to a WinRT TextBlock,
+            ' which throws ArgumentNullException on Nothing (unlike WPF or Silverlight).
             Get
-                Return _statusMessage
+                Return If(_statusMessage, String.Empty)
             End Get
             Set(value As String)
                 SetProperty(_statusMessage, value, "StatusMessage")

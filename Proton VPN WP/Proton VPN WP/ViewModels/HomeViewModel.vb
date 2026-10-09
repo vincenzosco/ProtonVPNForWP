@@ -16,7 +16,7 @@ Namespace ViewModels
 
         Friend Property AccountLine As String
             Get
-                Return _accountLine
+                Return If(_accountLine, String.Empty)
             End Get
             Set(value As String)
                 SetProperty(_accountLine, value, "AccountLine")
@@ -25,7 +25,7 @@ Namespace ViewModels
 
         Friend Property NetworkLine As String
             Get
-                Return _networkLine
+                Return If(_networkLine, String.Empty)
             End Get
             Set(value As String)
                 SetProperty(_networkLine, value, "NetworkLine")
@@ -34,7 +34,7 @@ Namespace ViewModels
 
         Friend Property CatalogueLine As String
             Get
-                Return _catalogueLine
+                Return If(_catalogueLine, String.Empty)
             End Get
             Set(value As String)
                 SetProperty(_catalogueLine, value, "CatalogueLine")
@@ -43,7 +43,7 @@ Namespace ViewModels
 
         Friend Property NoticeLine As String
             Get
-                Return _noticeLine
+                Return If(_noticeLine, String.Empty)
             End Get
             Set(value As String)
                 SetProperty(_noticeLine, value, "NoticeLine")
