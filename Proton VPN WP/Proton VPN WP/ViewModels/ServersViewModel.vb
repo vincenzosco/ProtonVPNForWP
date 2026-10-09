@@ -74,6 +74,12 @@ Namespace ViewModels
                 ApplyFilter()
                 StatusMessage = result.Message
                 Return result
+            Catch ex As Exception
+                ' This is awaited from ServersPage.OnNavigatedTo, a bare Async Sub:
+                ' without this the failure would leave the view model and end the process.
+                Log.Warn("The server browser could not load the catalogue: " & ex.Message)
+                StatusMessage = "The server list could not be loaded."
+                Return ApiResult(Of IList(Of ProtonLogical)).Failure("The server list could not be loaded.")
             Finally
                 IsBusy = False
             End Try

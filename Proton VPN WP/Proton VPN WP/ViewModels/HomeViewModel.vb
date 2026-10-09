@@ -111,6 +111,12 @@ Namespace ViewModels
 
                 StatusMessage = Nothing
                 Return result
+            Catch ex As Exception
+                ' This is awaited from HomePage.OnNavigatedTo, a bare Async Sub: without
+                ' this the failure would leave the view model and end the process.
+                Log.Warn("The dashboard could not load the catalogue: " & ex.Message)
+                NoticeLine = "The server list could not be loaded."
+                Return ApiResult(Of IList(Of ProtonLogical)).Failure("The server list could not be loaded.")
             Finally
                 IsBusy = False
             End Try

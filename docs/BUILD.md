@@ -171,6 +171,21 @@ print('\n'.join(sorted(zipfile.ZipFile(p).namelist())))"
    fails if the view model's refusal, the page's in-flight flag, or either
    control's disarming is removed.
 
+10. **Catalogue failure paths:**
+
+   ```bash
+   python tools/catalogue_check.py
+   ```
+
+   Expected: `catalogue failure paths: OK`. `ServerCatalog.LoadAsync`'s live
+   branch -- the only one that runs when Proton answers -- parses and caches a
+   network response outside any `Catch`, and both view models that call it are
+   awaited from bare `Async Sub` page handlers (`HomePage.OnNavigatedTo`,
+   `ServersPage.OnNavigatedTo`), where an escaping exception ends the process:
+   `App.OnUnhandledException` logs and does not set `Handled`. The check fails if
+   the load stops degrading to the bundle, or if either view model stops
+   reporting the failure itself.
+
 ## Reading the log
 
 Every session appends to `logs\app.log` inside the app's local folder, and the

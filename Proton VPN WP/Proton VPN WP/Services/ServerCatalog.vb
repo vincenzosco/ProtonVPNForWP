@@ -54,36 +54,54 @@ Namespace Services
                 Return ApiResult(Of IList(Of ProtonLogical)).Success(_servers)
             End If
 
-            Dim apiError As String = Nothing
+            Dim liveError As String = Nothing
+            Try
+                Dim apiError As String = Nothing
 
-            If _settings.Load().AutoRefreshCatalogue OrElse forceRefresh Then
-                Dim live As ApiResult(Of JsonObject) = Await _api.GetLogicalsAsync()
-                If live.Ok Then
-                    Dim parsed As List(Of ProtonLogical) = ParseLogicals(live.Value)
-                    If parsed.Count > 0 Then
-                        Replace(parsed, CatalogueSource.Api)
-                        Await WriteCacheAsync(live.Value.Stringify())
-                        Dim updated As AppSettings = _settings.Load()
-                        updated.LastCatalogueRefreshUtc = DateTime.UtcNow
-                        _settings.Save(updated)
-                        Return ApiResult(Of IList(Of ProtonLogical)).Success(_servers)
+                If _settings.Load().AutoRefreshCatalogue OrElse forceRefresh Then
+                    Dim live As ApiResult(Of JsonObject) = Await _api.GetLogicalsAsync()
+                    If live.Ok Then
+                        Dim parsed As List(Of ProtonLogical) = ParseLogicals(live.Value)
+                        If parsed.Count > 0 Then
+                            Replace(parsed, CatalogueSource.Api)
+                            Await WriteCacheAsync(live.Value.Stringify())
+                            Dim updated As AppSettings = _settings.Load()
+                            updated.LastCatalogueRefreshUtc = DateTime.UtcNow
+                            _settings.Save(updated)
+                            Return ApiResult(Of IList(Of ProtonLogical)).Success(_servers)
+                        End If
+                        apiError = "Proton returned an empty server list."
+                    Else
+                        apiError = live.Message
                     End If
-                    apiError = "Proton returned an empty server list."
-                Else
-                    apiError = live.Message
                 End If
-            End If
 
-            Dim cached As String = Await ReadCacheAsync()
-            If Not String.IsNullOrEmpty(cached) Then
-                Dim parsedCache As List(Of ProtonLogical) = ParseLogicals(Json.TryParseObject(cached))
-                If parsedCache.Count > 0 Then
-                    Replace(parsedCache, CatalogueSource.Cache)
-                    Return ApiResult(Of IList(Of ProtonLogical)).Success(_servers, apiError)
+                Dim cached As String = Await ReadCacheAsync()
+                If Not String.IsNullOrEmpty(cached) Then
+                    Dim parsedCache As List(Of ProtonLogical) = ParseLogicals(Json.TryParseObject(cached))
+                    If parsedCache.Count > 0 Then
+                        Replace(parsedCache, CatalogueSource.Cache)
+                        Return ApiResult(Of IList(Of ProtonLogical)).Success(_servers, apiError)
+                    End If
                 End If
-            End If
 
-            Return Await LoadBundledAsync(apiError)
+                Return Await LoadBundledAsync(apiError)
+            Catch ex As Exception
+                ' Everything above is the branch that runs when Proton answers, and it is
+                ' the only place this method can throw: it parses and caches a response
+                ' that came off the network, and it writes settings. Its contract is
+                ' that the caller always gets a usable list, so this degrades to the
+                ' bundle instead of escaping into the page handler that awaited it --
+                ' HomePage.OnNavigatedTo and ServersPage.OnNavigatedTo are bare Async
+                ' Subs, and an escaping exception there ends the process.
+                '
+                ' The fallback itself is awaited after the End Try: VB12 rejects an
+                ' Await inside a Catch (BC36943).
+                Log.Warn("Could not read the live catalogue: " & ex.Message)
+                liveError = "The live server list could not be read."
+            End Try
+
+            Return Await LoadBundledAsync(liveError)
         End Function
 
         Private Async Function LoadBundledAsync(apiError As String) As Task(Of ApiResult(Of IList(Of ProtonLogical)))
