@@ -156,10 +156,11 @@ Namespace Services
                 ' The code travels with the refusal, because it is the only thing that
                 ' says which refusal this is; the message below is for the user, and
                 ' a caller branching on it would be reading a protocol value out of
-                ' prose.
+                ' prose. The parsed body travels too: 1001/1002 is a refusal that
+                ' carries the UID and the server proof the continuation needs.
                 Dim errorText As String = Json.TryString(parsed, "Error")
                 If String.IsNullOrEmpty(errorText) Then errorText = DescribeCode(code)
-                Return ApiResult(Of JsonObject).Failure(errorText & " (code " & code.ToString() & ")", code)
+                Return ApiResult(Of JsonObject).Failure(errorText & " (code " & code.ToString() & ")", parsed, code)
             Catch ex As Exception
                 Log.Warn("Network request failed: " & ex.GetType().Name & " " & ex.Message)
                 ' Log-only and deliberately not awaited: the caller has an error to show

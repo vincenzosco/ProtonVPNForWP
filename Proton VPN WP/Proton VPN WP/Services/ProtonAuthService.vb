@@ -99,8 +99,12 @@ Namespace Services
                                                                                   srpSession)
 
             If Not authResult.Ok Then
-                ' Code 1001/1002 means "second factor required", not a failure.
-                If authResult.Message IsNot Nothing AndAlso authResult.Message.Contains("1001") Then
+                ' Code 1001/1002 means "second factor required", not a failure. The
+                ' branch reads the code, not the message: the payload it hands on
+                ' carries the UID that identifies the exchange a typed code continues,
+                ' and testing the message text hid the fact that the payload was
+                ' always Nothing.
+                If authResult.Code = 1001 OrElse authResult.Code = 1002 Then
                     Return BeginTwoFactor(authResult.Value, username, proofs.ExpectedServerProof)
                 End If
                 ' The code is the finding, and the only thing that separates a limited

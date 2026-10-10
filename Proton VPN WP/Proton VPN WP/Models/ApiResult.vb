@@ -58,5 +58,16 @@ Namespace Models
             Return New ApiResult(Of T)(False, message, Nothing, code)
         End Function
 
+        ''' <summary>
+        ''' A refusal that still carries the body it refused on.
+        '''
+        ''' 1001/1002 is not only a refusal: it carries the `UID` and the server proof
+        ''' that identify the exchange a typed second-factor code continues, and
+        ''' `Ok = False` used to mean those were thrown away with the body.
+        ''' </summary>
+        Friend Shared Shadows Function Failure(message As String, value As T, code As Integer) As ApiResult(Of T)
+            Return New ApiResult(Of T)(False, message, value, code)
+        End Function
+
     End Class
 End Namespace
