@@ -44,6 +44,16 @@ Module Program
             Console.WriteLine("x25519_pub=" & CryptoBytes.ToHex(X25519.PublicFromPrivate(alicePriv)))
             Console.WriteLine("x25519_shared=" & CryptoBytes.ToHex(X25519.SharedSecret(alicePriv, bobPub)))
 
+            ' FIPS-197 C.1 and GCM Test Case 2.
+            Dim aesKey As Byte() = CryptoBytes.FromHex("000102030405060708090a0b0c0d0e0f")
+            Dim aesBlock As Byte() = CryptoBytes.FromHex("00112233445566778899aabbccddeeff")
+            Console.WriteLine("aes_block=" & CryptoBytes.ToHex(Aes.EncryptBlock(aesKey, aesBlock)))
+
+            Dim gcmKey As Byte() = New Byte(15) {}
+            Dim gcmIv As Byte() = New Byte(11) {}
+            Dim gcmPlain As Byte() = New Byte(15) {}
+            Console.WriteLine("gcm_sealed=" & CryptoBytes.ToHex(Gcm.Seal(gcmKey, gcmIv, New Byte() {}, gcmPlain)))
+
             Environment.Exit(0)
         Catch ex As Exception
             Console.Error.WriteLine("HARNESS FAILURE: " & ex.GetType().Name & ": " & ex.Message)

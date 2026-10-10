@@ -104,12 +104,14 @@
     <Compile Include="Models\ProtonLogical.vb" />
     <Compile Include="Models\ProtonSession.vb" />
     <Compile Include="Models\VpnProfile.vb" />
+    <Compile Include="Services\Aes.vb" />
     <Compile Include="Services\AppServices.vb" />
     <Compile Include="Services\Bcrypt.vb" />
     <Compile Include="Services\BlowfishTables.vb" />
     <Compile Include="Services\ConnectivityService.vb" />
     <Compile Include="Services\CredentialVault.vb" />
     <Compile Include="Services\CryptoBytes.vb" />
+    <Compile Include="Services\Gcm.vb" />
     <Compile Include="Services\Hkdf.vb" />
     <Compile Include="Services\Hmac.vb" />
     <Compile Include="Services\Json.vb" />
