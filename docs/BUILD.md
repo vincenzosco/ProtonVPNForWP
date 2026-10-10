@@ -91,12 +91,15 @@ Three things bite here:
 - **`XDE.exe` takes the VM by name, not by VHD path.** `/vhd` is only read when
   the VM does not exist yet, so passing a path to an existing VM also just
   prints the usage text.
-- **Deploy x86 to the emulator.** `AnyCPU` and `ARM` packages install, but only
-  the `x86` one runs, and a deploy of the wrong architecture succeeds silently.
+- **Deploy x86 to the emulator.** The 8.1 emulator is an x86 guest, so the
+  `x86` package is the one to hand it. (The runs below deployed only that one;
+  what `AnyCPU` and `ARM` packages do on it has not been measured.)
 
-The app must be left in the foreground for a run to happen: `//installlaunch`
-starts it, but the emulator window has to keep focus, and the desktop must not be
-locked or in use by something else.
+The app has to be *started* for a run to happen, and `//installlaunch` does
+that: it installs and launches in one call, and the app then writes its log with
+other windows open on the host desktop, which is how the runs below were made.
+Nothing else needs the emulator window: the log comes back out through
+`ISETool`, not off the screen.
 
 ## Verification, in the order to run it
 

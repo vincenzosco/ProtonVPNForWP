@@ -67,9 +67,10 @@ while the platform's own stack, in the same diagnosis run, still fails with
 The emulator is also where the one bug no desktop check could have found
 appeared. VB checks integer overflow by default, and the crypto here is written
 to wrap, so the device build threw `OverflowException` inside the first
-handshake until the project was compiled with integer checks removed; the
-guards in `tools/` pass `/removeintchecks+` to the compiler themselves, so every
-one of them was green either way.
+handshake until the project was compiled with integer checks removed. The
+harnesses in `tools/` pass `/removeintchecks+` to `vbc` themselves, and the
+guards never compile the crypto at all, so the whole suite was green either way
+-- which is why the emulator run was the only thing that could have found it.
 
 Two things this does not free the app from. It still identifies itself with an
 `x-pm-appversion` Proton accepts (`windows-vpn@5.0.0.0`; an unknown product is
