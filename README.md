@@ -58,11 +58,12 @@ Measured on 2026-10-10 with `python tools/run_tls_harness.py`, which compiles th
 shipping sources and drives the live edge: TLS 1.3 handshake in suite `0x1301`
 and `HTTP 200` carrying Proton's SRP modulus from `account.proton.me`, while
 `www.microsoft.com` is refused because the pinned anchors do not sign its chain.
-The 8.1 emulator's own log shows the same exchange from the shipping sign-in
-path: `HTTP 200 POST account.proton.me/api/auth/info` and then `HTTP 422 POST
-account.proton.me/api/auth` -- Proton answering an account that does not exist --
-while the platform's own stack, in the same diagnosis run, still fails with
-`0x80090326`.
+The 8.1 emulator shows the same exchange from the shipping sign-in path, and from
+the shipped binary -- built and launched by Visual Studio, with no test
+scaffolding in it: `HTTP 200 POST account.proton.me/api/auth/info` and then
+`HTTP 422 POST account.proton.me/api/auth`, Proton answering an account that does
+not exist, while the platform's own stack, in the same diagnosis run, still fails
+with `0x80090326`.
 
 The emulator is also where the one bug no desktop check could have found
 appeared. VB checks integer overflow by default, and the crypto here is written

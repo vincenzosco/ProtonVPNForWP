@@ -91,9 +91,9 @@ Three things bite here:
 - **`XDE.exe` takes the VM by name, not by VHD path.** `/vhd` is only read when
   the VM does not exist yet, so passing a path to an existing VM also just
   prints the usage text.
-- **Deploy x86 to the emulator.** The 8.1 emulator is an x86 guest, so the
-  `x86` package is the one to hand it. (The runs below deployed only that one;
-  what `AnyCPU` and `ARM` packages do on it has not been measured.)
+- **Which package to deploy.** The command-line runs below used the `x86`
+  package. The F5 path deploys `Debug|AnyCPU` and runs too -- the Visual Studio
+  run below is one of those. Both are measured; an `ARM` package is not.
 
 The app has to be *started* for a run to happen, and `//installlaunch` does
 that: it installs and launches in one call, and the app then writes its log with
@@ -277,6 +277,28 @@ Nothing else needs the emulator window: the log comes back out through
     `200` from `/api/auth/info` is Proton answering over the app's TLS 1.3
     handshake, and `422` is Proton rejecting the throwaway account at the API
     level -- a request that reached the service, which is the whole point.
+
+    **And then the shipped binary, from Visual Studio.** The run above pressed
+    Sign in from a temporary hook. This one has none: the scaffold-free tree,
+    with the overflow fix in it, built as `Debug|AnyCPU` and deployed and started
+    by Visual Studio 2013 on the same emulator. `Log.Write` sends a short
+    local-time line to `System.Diagnostics.Debug`, so the Output window shows the
+    same session as `logs\app.log` does, in the other rendering:
+
+    ```
+    'Proton VPN WP.exe' (CoreCLR: .): Loaded '...\VS.Debug_AnyCPU.Vincenzo\Proton VPN WP.exe'. Symbols loaded.
+    [19:02:17] Info: startup: app constructed
+    [19:02:17] Info: restore: no stored session
+    [19:02:17] Info: restore: end
+    [19:03:10] Info: HTTP 200 POST account.proton.me/api/auth/info
+    [19:03:11] Info: HTTP 422 POST account.proton.me/api/auth
+    ```
+
+    Two things to read in it: no `nettest:` line, which is how the scaffolding's
+    absence is visible; and `SYSTEM.RUNTIME.NUMERICS.NI.DLL` among the loaded
+    modules, which is the new client's `BigInteger` arriving. This is the
+    strongest of the runs -- the shipped binary, the architecture the F5 path
+    picks, driven from the editor the maintainer already has open.
 
     Proton accepts only ECDHE+AES-GCM/ChaCha20 suites at TLS 1.2, and Windows
     8.1/Windows Phone 8.1's Schannel offers none of them for an RSA server
