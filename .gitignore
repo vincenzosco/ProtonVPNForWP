@@ -26,3 +26,7 @@ tools/vb_srp_harness/out/
 # Log harness build output
 tools/vb_log_harness/out/
 tools/vb_log_harness/*.exe
+
+# TLS crypto harness build output
+tools/vb_tls_harness/out/
+tools/vb_tls_harness/*.exe
