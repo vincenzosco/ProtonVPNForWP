@@ -106,6 +106,7 @@
     <Compile Include="Models\VpnProfile.vb" />
     <Compile Include="Services\Aes.vb" />
     <Compile Include="Services\AppServices.vb" />
+    <Compile Include="Services\Asn1.vb" />
     <Compile Include="Services\Bcrypt.vb" />
     <Compile Include="Services\BlowfishTables.vb" />
     <Compile Include="Services\ConnectivityService.vb" />
@@ -130,6 +131,7 @@
     <Compile Include="Services\TlsKeys.vb" />
     <Compile Include="Services\VpnProfileBuilder.vb" />
     <Compile Include="Services\X25519.vb" />
+    <Compile Include="Services\X509.vb" />
     <Compile Include="ViewModels\HomeViewModel.vb" />
     <Compile Include="ViewModels\LoginViewModel.vb" />
     <Compile Include="ViewModels\ProfileViewModel.vb" />

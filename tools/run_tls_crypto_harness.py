@@ -24,7 +24,7 @@ APP_SERVICES = HERE.parent / "Proton VPN WP" / "Proton VPN WP" / "Services"
 OUT = HERE / "vb_tls_harness" / "out"
 
 # Grows as the crypto primitives are added.
-SOURCE_FILES = ["CryptoBytes.vb", "Sha256.vb", "Hmac.vb", "Hkdf.vb", "X25519.vb", "Aes.vb", "Gcm.vb", "RsaVerify.vb", "TlsKeys.vb"]
+SOURCE_FILES = ["CryptoBytes.vb", "Sha256.vb", "Hmac.vb", "Hkdf.vb", "X25519.vb", "Aes.vb", "Gcm.vb", "RsaVerify.vb", "TlsKeys.vb", "Asn1.vb", "X509.vb"]
 
 
 def find_vbc() -> str:
@@ -193,6 +193,23 @@ def main() -> int:
         if not match:
             print(f"         got  {have}")
             print(f"         want {want.hex()}")
+        ok = ok and match
+
+    chain_dir = HERE / "vb_tls_harness" / "chain"
+    chain_proc = subprocess.run([exe, "chain", str(chain_dir), "account.proton.me"],
+                                capture_output=True, text=True)
+    if chain_proc.returncode != 0:
+        print(chain_proc.stdout)
+        print(chain_proc.stderr)
+        raise SystemExit(f"chain harness exited {chain_proc.returncode}")
+    chain_got = parse(chain_proc.stdout)
+    for key in ("chain_ok", "chain_bad_host", "chain_bad_sig"):
+        match = chain_got.get(key) == "1"
+        print(f"  [{'PASS' if match else 'FAIL'}] {key}")
+        if not match:
+            print(f"         got  {chain_got.get(key)}")
+            if chain_got.get("chain_reason"):
+                print(f"         reason {chain_got['chain_reason']}")
         ok = ok and match
 
     print("TLS crypto harness vs Python reference:", "OK" if ok else "FAILED")

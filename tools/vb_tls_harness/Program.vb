@@ -25,6 +25,11 @@ Module Program
                 Environment.Exit(0)
             End If
 
+            If args.Length >= 3 AndAlso args(0) = "chain" Then
+                RunChain(args)
+                Environment.Exit(0)
+            End If
+
             Console.WriteLine("sha256_empty=" & CryptoBytes.ToHex(Sha256.Hash(New Byte() {})))
             Console.WriteLine("sha256_abc=" & CryptoBytes.ToHex(Sha256.Hash(System.Text.Encoding.ASCII.GetBytes("abc"))))
 
@@ -68,6 +73,7 @@ Module Program
             Environment.Exit(0)
         Catch ex As Exception
             Console.Error.WriteLine("HARNESS FAILURE: " & ex.GetType().Name & ": " & ex.Message)
+            Console.Error.WriteLine(ex.StackTrace)
             Environment.Exit(1)
         End Try
     End Sub
@@ -111,6 +117,37 @@ Module Program
         Console.WriteLine("key=" & CryptoBytes.ToHex(TlsKeys.TrafficKey(cHs)))
         Console.WriteLine("iv=" & CryptoBytes.ToHex(TlsKeys.TrafficIv(cHs)))
         Console.WriteLine("finished=" & CryptoBytes.ToHex(TlsKeys.FinishedVerifyData(TlsKeys.FinishedKey(cHs), th)))
+    End Sub
+
+    ' chain <certDir> <host>
+    Sub RunChain(args As String())
+        Dim certDir As String = args(1)
+        Dim host As String = args(2)
+        Dim now As New DateTime(2026, 10, 10, 0, 0, 0, DateTimeKind.Utc)
+
+        Dim chain As New System.Collections.Generic.List(Of X509.Certificate)()
+        For i As Integer = 1 To 3
+            chain.Add(X509.Parse(System.IO.File.ReadAllBytes(
+                System.IO.Path.Combine(certDir, "cert" & i.ToString() & ".der"))))
+        Next
+
+        Dim reason As String = X509.VerifyChain(chain, host, now)
+        Console.WriteLine("chain_ok=" & If(reason Is Nothing, "1", "0"))
+        If reason IsNot Nothing Then Console.WriteLine("chain_reason=" & reason)
+
+        Console.WriteLine("chain_bad_host=" & If(X509.VerifyChain(chain, "evil.example.com", now) Is Nothing, "0", "1"))
+
+        ' Tamper with the leaf signature and expect the chain to be rejected.
+        Dim tampered As New System.Collections.Generic.List(Of X509.Certificate)()
+        Dim leaf As X509.Certificate = X509.Parse(System.IO.File.ReadAllBytes(
+            System.IO.Path.Combine(certDir, "cert1.der")))
+        Dim broken As Byte() = CType(leaf.Signature.Clone(), Byte())
+        broken(0) = CByte(broken(0) Xor 1)
+        leaf.Signature = broken
+        tampered.Add(leaf)
+        tampered.Add(chain(1))
+        tampered.Add(chain(2))
+        Console.WriteLine("chain_bad_sig=" & If(X509.VerifyChain(tampered, host, now) Is Nothing, "0", "1"))
     End Sub
 
 End Module
