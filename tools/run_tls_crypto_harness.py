@@ -24,7 +24,7 @@ APP_SERVICES = HERE.parent / "Proton VPN WP" / "Proton VPN WP" / "Services"
 OUT = HERE / "vb_tls_harness" / "out"
 
 # Grows as the crypto primitives are added.
-SOURCE_FILES = ["CryptoBytes.vb", "Sha256.vb", "Hmac.vb", "Hkdf.vb"]
+SOURCE_FILES = ["CryptoBytes.vb", "Sha256.vb", "Hmac.vb", "Hkdf.vb", "X25519.vb"]
 
 
 def find_vbc() -> str:
@@ -74,6 +74,11 @@ def expected() -> dict[str, str]:
         "hmac_sha256": hmaclib.new(key, b"Hi There", hashlib.sha256).hexdigest(),
         "hkdf_prk": prk.hex(),
         "hkdf_okm": okm.hex(),
+        # RFC 7748 section 5.2 and section 6.1, reproduced with the Python oracle
+        # in tools/sdd evidence (see the ledger).
+        "x25519_vec": "c3da55379de9c6908e94ea4df28d084f32eccf03491c71f754b4075577a28552",
+        "x25519_pub": "8520f0098930a754748b7ddcb43ef75a0dbf3a0d26381af4eba4a98eaa9b4e6a",
+        "x25519_shared": "4a5d9d5ba4ce2de1728e3bf480350f25e07e21c947d19e3376f09b3c1e161742",
     }
 
 

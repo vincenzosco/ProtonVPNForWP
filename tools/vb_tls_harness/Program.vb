@@ -34,6 +34,16 @@ Module Program
             Console.WriteLine("hkdf_prk=" & CryptoBytes.ToHex(prk))
             Console.WriteLine("hkdf_okm=" & CryptoBytes.ToHex(Hkdf.Expand(prk, info, 42)))
 
+            ' RFC 7748 section 5.2 and section 6.1.
+            Dim vecScalar As Byte() = CryptoBytes.FromHex("a546e36bf0527c9d3b16154b82465edd62144c0ac1fc5a18506a2244ba449ac4")
+            Dim vecU As Byte() = CryptoBytes.FromHex("e6db6867583030db3594c1a424b15f7c726624ec26b3353b10a903a6d0ab1c4c")
+            Console.WriteLine("x25519_vec=" & CryptoBytes.ToHex(X25519.SharedSecret(vecScalar, vecU)))
+
+            Dim alicePriv As Byte() = CryptoBytes.FromHex("77076d0a7318a57d3c16c17251b26645df4c2f87ebc0992ab177fba51db92c2a")
+            Dim bobPub As Byte() = CryptoBytes.FromHex("de9edb7d7b7dc1b4d35b61c2ece435373f8343c85b78674dadfc7e146f882b4f")
+            Console.WriteLine("x25519_pub=" & CryptoBytes.ToHex(X25519.PublicFromPrivate(alicePriv)))
+            Console.WriteLine("x25519_shared=" & CryptoBytes.ToHex(X25519.SharedSecret(alicePriv, bobPub)))
+
             Environment.Exit(0)
         Catch ex As Exception
             Console.Error.WriteLine("HARNESS FAILURE: " & ex.GetType().Name & ": " & ex.Message)
