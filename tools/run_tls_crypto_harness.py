@@ -24,7 +24,7 @@ APP_SERVICES = HERE.parent / "Proton VPN WP" / "Proton VPN WP" / "Services"
 OUT = HERE / "vb_tls_harness" / "out"
 
 # Grows as the crypto primitives are added.
-SOURCE_FILES = ["CryptoBytes.vb", "Sha256.vb", "Hmac.vb"]
+SOURCE_FILES = ["CryptoBytes.vb", "Sha256.vb", "Hmac.vb", "Hkdf.vb"]
 
 
 def find_vbc() -> str:
@@ -55,12 +55,25 @@ def build() -> str:
     return str(exe)
 
 
+def hkdf_sha256(ikm: bytes, salt: bytes, info: bytes, length: int) -> tuple[bytes, bytes]:
+    prk = hmaclib.new(salt, ikm, hashlib.sha256).digest()
+    okm, t, counter = b"", b"", 1
+    while len(okm) < length:
+        t = hmaclib.new(prk, t + info + bytes([counter]), hashlib.sha256).digest()
+        okm += t
+        counter += 1
+    return prk, okm[:length]
+
+
 def expected() -> dict[str, str]:
     key = b"\xbb" * 20
+    prk, okm = hkdf_sha256(b"\x0b" * 22, bytes(range(13)), bytes(range(0xF0, 0xFA)), 42)
     return {
         "sha256_empty": hashlib.sha256(b"").hexdigest(),
         "sha256_abc": hashlib.sha256(b"abc").hexdigest(),
         "hmac_sha256": hmaclib.new(key, b"Hi There", hashlib.sha256).hexdigest(),
+        "hkdf_prk": prk.hex(),
+        "hkdf_okm": okm.hex(),
     }
 
 

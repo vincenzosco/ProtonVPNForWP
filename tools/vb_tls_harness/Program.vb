@@ -23,6 +23,17 @@ Module Program
             Next
             Console.WriteLine("hmac_sha256=" & CryptoBytes.ToHex(Hmac.Sha256(key, System.Text.Encoding.ASCII.GetBytes("Hi There"))))
 
+            ' RFC 5869 Test Case 1.
+            Dim ikm As Byte() = New Byte(21) {}
+            For i As Integer = 0 To 21
+                ikm(i) = &HB
+            Next
+            Dim salt As Byte() = {&H0, &H1, &H2, &H3, &H4, &H5, &H6, &H7, &H8, &H9, &HA, &HB, &HC}
+            Dim info As Byte() = {&HF0, &HF1, &HF2, &HF3, &HF4, &HF5, &HF6, &HF7, &HF8, &HF9}
+            Dim prk As Byte() = Hkdf.Extract(salt, ikm)
+            Console.WriteLine("hkdf_prk=" & CryptoBytes.ToHex(prk))
+            Console.WriteLine("hkdf_okm=" & CryptoBytes.ToHex(Hkdf.Expand(prk, info, 42)))
+
             Environment.Exit(0)
         Catch ex As Exception
             Console.Error.WriteLine("HARNESS FAILURE: " & ex.GetType().Name & ": " & ex.Message)

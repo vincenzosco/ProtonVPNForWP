@@ -110,6 +110,7 @@
     <Compile Include="Services\ConnectivityService.vb" />
     <Compile Include="Services\CredentialVault.vb" />
     <Compile Include="Services\CryptoBytes.vb" />
+    <Compile Include="Services\Hkdf.vb" />
     <Compile Include="Services\Hmac.vb" />
     <Compile Include="Services\Json.vb" />
     <Compile Include="Services\Log.vb" />
