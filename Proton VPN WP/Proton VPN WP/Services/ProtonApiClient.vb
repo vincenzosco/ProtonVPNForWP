@@ -153,9 +153,13 @@ Namespace Services
                 Dim code As Integer = Json.TryInt(parsed, "Code", 0)
                 If code = 1000 Then Return ApiResult(Of JsonObject).Success(parsed)
 
+                ' The code travels with the refusal, because it is the only thing that
+                ' says which refusal this is; the message below is for the user, and
+                ' a caller branching on it would be reading a protocol value out of
+                ' prose.
                 Dim errorText As String = Json.TryString(parsed, "Error")
                 If String.IsNullOrEmpty(errorText) Then errorText = DescribeCode(code)
-                Return ApiResult(Of JsonObject).Failure(errorText & " (code " & code.ToString() & ")")
+                Return ApiResult(Of JsonObject).Failure(errorText & " (code " & code.ToString() & ")", code)
             Catch ex As Exception
                 Log.Warn("Network request failed: " & ex.GetType().Name & " " & ex.Message)
                 ' Log-only and deliberately not awaited: the caller has an error to show
@@ -199,8 +203,20 @@ Namespace Services
             End Try
         End Function
 
-        Private Shared Function DescribeCode(code As Integer) As String
+        ''' <summary>
+        ''' The fixed sentence for one of Proton's codes.
+        '''
+        ''' Shared rather than private because the sign-in path logs it: the log line
+        ''' names the code, and never Proton's own `Error` text, which quotes the
+        ''' account identifiers back into a file the user can share.
+        ''' </summary>
+        Friend Shared Function DescribeCode(code As Integer) As String
             Select Case code
+                ' 2028 is what a real account answers with while Proton has limited it;
+                ' the server's own Error text carries the explanation and the appeal
+                ' path, and the user-facing message prefers it, but a refusal with no
+                ' Error text must not collapse to "Proton rejected the request."
+                Case 2028 : Return "Proton has temporarily limited this account."
                 Case 8002 : Return "Incorrect login credentials."
                 Case 1001 : Return "Two-factor authentication is required."
                 Case 1002 : Return "Two-factor authentication is required."

@@ -103,6 +103,11 @@ Namespace Services
                 If authResult.Message IsNot Nothing AndAlso authResult.Message.Contains("1001") Then
                     Return BeginTwoFactor(authResult.Value, username, proofs.ExpectedServerProof)
                 End If
+                ' The code is the finding, and the only thing that separates a limited
+                ' account from a wrong password from a refused proof. Proton's own Error
+                ' text stays out of the log because it quotes the address back.
+                Log.Warn("sign-in refused: code " & authResult.Code.ToString() & " (" &
+                         ProtonApiClient.DescribeCode(authResult.Code) & ")")
                 Return ApiResult(Of ProtonSession).Failure(authResult.Message)
             End If
 
@@ -136,7 +141,11 @@ Namespace Services
 
         Private Async Function CompleteTwoFactorAsync(username As String, code As String) As Task(Of ApiResult(Of ProtonSession))
             Dim result As ApiResult(Of JsonObject) = Await _api.PostTwoFactorAsync(_pendingUid, code)
-            If Not result.Ok Then Return ApiResult(Of ProtonSession).Failure(result.Message)
+            If Not result.Ok Then
+                Log.Warn("sign-in refused: code " & result.Code.ToString() & " (" &
+                         ProtonApiClient.DescribeCode(result.Code) & ")")
+                Return ApiResult(Of ProtonSession).Failure(result.Message)
+            End If
 
             Dim accepted As ApiResult(Of ProtonSession) = Await AcceptAsync(result.Value, username, _pendingServerProof)
             If accepted.Ok AndAlso Not accepted.Value.IsTwoFactorPending Then ClearPending()
