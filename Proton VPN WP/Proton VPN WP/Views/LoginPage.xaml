@@ -27,7 +27,7 @@
             <TextBlock x:Name="PlatformNoticeText"
                        Style="{StaticResource ProtonCaption}"
                        Margin="0,14,0,0"
-                       Text="Windows Phone 8.1 has no VPN programming interface, so this app prepares the profile and Windows opens the tunnel from its built-in VPN." />
+                       Text="Windows Phone 8.1 has no VPN programming interface, so this app prepares the profile and Windows opens the tunnel from its built-in VPN. It also cannot complete the secure handshake Proton's servers now require, so signing in and refreshing the live server list fail on this platform — use 'Continue without an account' to work from the bundled server list." />
 
             <TextBlock Text="USERNAME" Style="{StaticResource ProtonSectionHeader}" />
             <TextBox x:Name="UsernameBox"

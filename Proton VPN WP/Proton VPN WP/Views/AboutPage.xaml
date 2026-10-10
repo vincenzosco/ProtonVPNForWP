@@ -19,7 +19,7 @@
                         <TextBlock Text="What this app does" Style="{StaticResource ProtonSectionHeader}" Margin="0,0,0,6" />
                         <TextBlock Style="{StaticResource ProtonBody}"
                                    TextWrapping="Wrap"
-                                   Text="Signs in to your Proton account, downloads the live server list (and works from an offline copy when there is no network), then gives you the exact IKEv2 / OpenVPN values Windows Phone's built-in VPN client needs." />
+                                   Text="Gives you the exact IKEv2 / OpenVPN values Windows Phone's built-in VPN client needs, from the bundled offline server list. Signing in and refreshing the live server list require reaching Proton — see below for why that cannot happen on this platform." />
                     </StackPanel>
                 </Border>
 
@@ -29,6 +29,10 @@
                         <TextBlock Style="{StaticResource ProtonBody}"
                                    TextWrapping="Wrap"
                                    Text="Windows Phone 8.1 gives third-party apps no VPN API: no profile installation and no tunnel control. Nothing in this app can connect or disconnect the tunnel for you — that always happens in the system VPN list. Treat the 'connection' card on the Home page as status, never as a switch." />
+                        <TextBlock Style="{StaticResource ProtonBody}"
+                                   TextWrapping="Wrap"
+                                   Margin="0,8,0,0"
+                                   Text="Proton's API edge now accepts only cipher suites Windows Phone 8.1's TLS stack does not offer, so this platform cannot complete the secure handshake Proton requires and its servers cannot be reached at all: signing in and the live server list fail before any request is sent, on any network. The bundled offline server list, the server browser and the IKEv2 / OpenVPN values still work." />
                     </StackPanel>
                 </Border>
 

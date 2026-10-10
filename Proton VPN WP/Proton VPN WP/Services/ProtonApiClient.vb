@@ -142,8 +142,28 @@ Namespace Services
                 ' and must not wait ~15s for a diagnosis. It runs at most once per 20s,
                 ' and it is what turns "0x80072EFD" into the layer that refused.
                 ConnectivityService.DiagnoseAsync("the request to " & SafePath(url) & " did not reach the host", url)
-                Return ApiResult(Of JsonObject).Failure("Could not reach Proton. Check the connection and try again.")
+                Return ApiResult(Of JsonObject).Failure(ReachabilityFailureMessage())
             End Try
+        End Function
+
+        ''' <summary>
+        ''' The message to show when a request did not reach Proton.
+        '''
+        ''' "Check the connection and try again" blamed the user's network for what is,
+        ''' on this platform, the platform's own limit: Windows Phone 8.1 offers no
+        ''' cipher suite Proton's edge accepts (see the README), so the handshake is
+        ''' refused before a request is sent, on a network that works. The connection
+        ''' profile is the one signal available without waiting, and it separates the
+        ''' two honest answers: no profile means the device really is offline; a profile
+        ''' with internet access means the refusal is the platform's.
+        ''' </summary>
+        Private Shared Function ReachabilityFailureMessage() As String
+            If Not ConnectivityService.HasInternetAccess() Then
+                Return "You appear to be offline. Connect to a network and try again."
+            End If
+            Return "This device has a connection, but Windows Phone 8.1 cannot complete " &
+                   "the secure handshake Proton's servers now require, so signing in and " &
+                   "the live server list are unavailable here. The offline server list still works."
         End Function
 
         ''' <summary>Logs the endpoint without the query string, which can carry tokens.</summary>
