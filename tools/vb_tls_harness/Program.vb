@@ -9,6 +9,7 @@
 ' Prints one `key=hex` line per value for the Python driver to compare.
 Imports System
 Imports Crypto
+Imports Tls
 
 Module Program
 
@@ -16,6 +17,11 @@ Module Program
         Try
             If args.Length >= 6 AndAlso args(0) = "rsa" Then
                 RunRsa(args)
+                Environment.Exit(0)
+            End If
+
+            If args.Length >= 3 AndAlso args(0) = "keys" Then
+                RunKeys(args)
                 Environment.Exit(0)
             End If
 
@@ -83,6 +89,28 @@ Module Program
 
         Dim wrongMessage As Byte() = System.Text.Encoding.ASCII.GetBytes("another-message")
         Console.WriteLine("pkcs1_reject_msg=" & If(RsaVerify.VerifyPkcs1Sha256(modulus, exponent, wrongMessage, pkcs1), "0", "1"))
+    End Sub
+
+    ' keys <sharedSecretHex> <transcriptHashHex>
+    Sub RunKeys(args As String())
+        Dim sharedSecret As Byte() = CryptoBytes.FromHex(args(1))
+        Dim th As Byte() = CryptoBytes.FromHex(args(2))
+
+        Dim early As Byte() = TlsKeys.EarlySecret()
+        Dim handshakeSecret As Byte() = TlsKeys.HandshakeSecret(early, sharedSecret)
+        Dim master As Byte() = TlsKeys.MasterSecret(handshakeSecret)
+        Dim cHs As Byte() = TlsKeys.ClientHandshakeTrafficSecret(handshakeSecret, th)
+
+        Console.WriteLine("early=" & CryptoBytes.ToHex(early))
+        Console.WriteLine("handshake=" & CryptoBytes.ToHex(handshakeSecret))
+        Console.WriteLine("master=" & CryptoBytes.ToHex(master))
+        Console.WriteLine("c_hs=" & CryptoBytes.ToHex(cHs))
+        Console.WriteLine("s_hs=" & CryptoBytes.ToHex(TlsKeys.ServerHandshakeTrafficSecret(handshakeSecret, th)))
+        Console.WriteLine("c_ap=" & CryptoBytes.ToHex(TlsKeys.ClientApplicationTrafficSecret(master, th)))
+        Console.WriteLine("s_ap=" & CryptoBytes.ToHex(TlsKeys.ServerApplicationTrafficSecret(master, th)))
+        Console.WriteLine("key=" & CryptoBytes.ToHex(TlsKeys.TrafficKey(cHs)))
+        Console.WriteLine("iv=" & CryptoBytes.ToHex(TlsKeys.TrafficIv(cHs)))
+        Console.WriteLine("finished=" & CryptoBytes.ToHex(TlsKeys.FinishedVerifyData(TlsKeys.FinishedKey(cHs), th)))
     End Sub
 
 End Module

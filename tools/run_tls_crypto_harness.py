@@ -24,7 +24,7 @@ APP_SERVICES = HERE.parent / "Proton VPN WP" / "Proton VPN WP" / "Services"
 OUT = HERE / "vb_tls_harness" / "out"
 
 # Grows as the crypto primitives are added.
-SOURCE_FILES = ["CryptoBytes.vb", "Sha256.vb", "Hmac.vb", "Hkdf.vb", "X25519.vb", "Aes.vb", "Gcm.vb", "RsaVerify.vb"]
+SOURCE_FILES = ["CryptoBytes.vb", "Sha256.vb", "Hmac.vb", "Hkdf.vb", "X25519.vb", "Aes.vb", "Gcm.vb", "RsaVerify.vb", "TlsKeys.vb"]
 
 
 def find_vbc() -> str:
@@ -107,6 +107,40 @@ def rsa_vectors() -> list[str]:
     return ["rsa", modulus.hex(), "010001", message.hex(), pss.hex(), pkcs1.hex()]
 
 
+def hkdf_expand(prk: bytes, info: bytes, length: int) -> bytes:
+    okm, t, counter = b"", b"", 1
+    while len(okm) < length:
+        t = hmaclib.new(prk, t + info + bytes([counter]), hashlib.sha256).digest()
+        okm += t
+        counter += 1
+    return okm[:length]
+
+
+def expand_label(secret: bytes, label: bytes, context: bytes, length: int) -> bytes:
+    full = b"tls13 " + label
+    info = length.to_bytes(2, "big") + bytes([len(full)]) + full + bytes([len(context)]) + context
+    return hkdf_expand(secret, info, length)
+
+
+def tls13_schedule(shared: bytes, th: bytes) -> dict[str, bytes]:
+    zero, empty = bytes(32), hashlib.sha256(b"").digest()
+    early = hmaclib.new(zero, zero, hashlib.sha256).digest()
+    handshake = hmaclib.new(expand_label(early, b"derived", empty, 32), shared, hashlib.sha256).digest()
+    master = hmaclib.new(expand_label(handshake, b"derived", empty, 32), zero, hashlib.sha256).digest()
+    c_hs = expand_label(handshake, b"c hs traffic", th, 32)
+    fin = expand_label(c_hs, b"finished", b"", 32)
+    return {
+        "early": early, "handshake": handshake, "master": master,
+        "c_hs": c_hs,
+        "s_hs": expand_label(handshake, b"s hs traffic", th, 32),
+        "c_ap": expand_label(master, b"c ap traffic", th, 32),
+        "s_ap": expand_label(master, b"s ap traffic", th, 32),
+        "key": expand_label(c_hs, b"key", b"", 16),
+        "iv": expand_label(c_hs, b"iv", b"", 12),
+        "finished": hmaclib.new(fin, th, hashlib.sha256).digest(),
+    }
+
+
 def main() -> int:
     exe = build()
     proc = subprocess.run([exe], capture_output=True, text=True)
@@ -143,6 +177,23 @@ def main() -> int:
             if not match:
                 print(f"         got  {rsa_got.get(key)}")
             ok = ok and match
+
+    shared = bytes(range(1, 33))
+    th = bytes(range(0x41, 0x61))
+    keys_proc = subprocess.run([exe, "keys", shared.hex(), th.hex()], capture_output=True, text=True)
+    if keys_proc.returncode != 0:
+        print(keys_proc.stdout)
+        print(keys_proc.stderr)
+        raise SystemExit(f"keys harness exited {keys_proc.returncode}")
+    keys_got = parse(keys_proc.stdout)
+    for key, want in tls13_schedule(shared, th).items():
+        have = keys_got.get(key)
+        match = have == want.hex()
+        print(f"  [{'PASS' if match else 'FAIL'}] tls13_{key}")
+        if not match:
+            print(f"         got  {have}")
+            print(f"         want {want.hex()}")
+        ok = ok and match
 
     print("TLS crypto harness vs Python reference:", "OK" if ok else "FAILED")
     return 0 if ok else 1
