@@ -166,8 +166,14 @@ Namespace Services
                 Dim host As String = New Uri(protonUrl).Host
                 Await ProbeDnsAsync(host)
                 Await ProbeTcpAsync(host, DiagnosePort)
-                Await ProbeTlsAsync(host, DiagnosePort, SocketProtectionLevel.Tls12, "tls12")
-                Await ProbeTlsAsync(host, DiagnosePort, SocketProtectionLevel.Tls11, "tls11")
+                ' The stack the app actually uses, first, because that is the line that
+                ' answers "can this device reach Proton".
+                Await ProbeManagedTlsAsync(host, DiagnosePort)
+                ' Then the platform's own stack, which cannot: keeping it in the log is
+                ' what documents why the app carries a TLS client of its own. The TLS 1.1
+                ' probe was dropped here -- two platform protocols always fail together,
+                ' and each probe can cost the full timeout.
+                Await ProbeTlsAsync(host, DiagnosePort, SocketProtectionLevel.Tls12, "tls12 platform")
                 Await ProbeTlsAsync(ControlTlsHost, DiagnosePort, SocketProtectionLevel.Tls12, "tls12 control")
                 Await ProbeHttpAsync("control", ControlUrl)
                 Await ProbeHttpAsync("proton", protonUrl)
@@ -235,7 +241,53 @@ Namespace Services
         End Function
 
         ''' <summary>
-        ''' The handshake on its own, at one named protocol.
+        ''' The handshake through the app's own TLS 1.3 client, which is the stack
+        ''' every request actually uses. This is the layer the sign-in path depends on,
+        ''' so it is probed before the platform's.
+        '''
+        ''' Bounded twice -- the TCP connect and the handshake separately -- because a
+        ''' connection that opens and then goes quiet is the failure that a probe most
+        ''' needs to report and least wants to wait for.
+        ''' </summary>
+        Private Shared Async Function ProbeManagedTlsAsync(host As String, port As Integer) As Task
+            Dim stopwatch As Stopwatch = Stopwatch.StartNew()
+            Dim transport As Tls.SocketTlsTransport = Nothing
+            Try
+                Dim connectTask As Task(Of Tls.SocketTlsTransport) = Tls.SocketTlsTransport.ConnectAsync(host, port)
+                Dim connected As Task = Await Task.WhenAny(connectTask, Task.Delay(DiagnoseProbeTimeoutMs))
+                If Not Object.ReferenceEquals(connected, connectTask) Then
+                    Log.Warn("netdiag: tls tls13 (managed) " & host & " -> no answer within " &
+                             DiagnoseProbeTimeoutMs.ToString() & " ms")
+                    Return
+                End If
+                transport = Await connectTask
+
+                Dim handshake As Task(Of Tls.TlsClient) = Tls.TlsClient.ConnectAsync(transport, New SystemRandomSource(), host)
+                Dim finished As Task = Await Task.WhenAny(handshake, Task.Delay(DiagnoseProbeTimeoutMs))
+                If Not Object.ReferenceEquals(finished, handshake) Then
+                    Log.Warn("netdiag: tls tls13 (managed) " & host & " -> no answer within " &
+                             DiagnoseProbeTimeoutMs.ToString() & " ms")
+                    Return
+                End If
+
+                Dim client As Tls.TlsClient = Await handshake
+                stopwatch.Stop()
+                Log.Info("netdiag: tls tls13 (managed) " & host & " -> handshake in " &
+                         stopwatch.ElapsedMilliseconds.ToString() & " ms, suite 0x" &
+                         client.NegotiatedSuite.ToString("x4"))
+                client.Close()
+            Catch ex As Exception
+                ' The message of a failed handshake is the finding -- "the certificate
+                ' chain is not signed correctly", an alert code, a tag mismatch.
+                Log.Warn("netdiag: tls tls13 (managed) " & host & " failed: " & ex.Message)
+            Finally
+                If transport IsNot Nothing Then transport.Close()
+            End Try
+        End Function
+
+        ''' <summary>
+        ''' The handshake on its own, at one named protocol, through the platform's
+        ''' Schannel stack.
         '''
         ''' This is the layer that a transport failure hides. The emulator run of
         ''' 2026-10-10 connected TCP to Proton in 71 ms and then failed the HTTPS

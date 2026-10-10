@@ -1,26 +1,32 @@
-"""Honesty invariants: the app must not blame the user for a platform limit.
+"""Honesty invariants: the app must not blame the user for a platform limit, and
+must not hide the one it bypasses.
 
-The 2026-10-10 diagnosis proved a permanent platform limit: Windows Phone 8.1
-offers no cipher suite Proton's API edge accepts, so the handshake is refused
-before a single request is sent -- on a network that works. Every device
-transcript since 2026-10-09 ends in the same place, and the app answered it with
-one sentence for every transport failure:
+Two measurements are on record. The first (2026-10-10): Windows Phone 8.1 offers
+no cipher suite Proton's API edge accepts, so *the platform's* stack is refused
+before a single request is sent, on a network that works. Every device transcript
+since 2026-10-09 ended there, and the app answered all of it with one sentence:
 
     "Could not reach Proton. Check the connection and try again."
 
-That sentence is false here. The connection is fine; the platform cannot handshake
-with Proton at all. So this guard pins three things:
+That sentence blamed the user for the platform. The second measurement, same day:
+the app can complete that handshake itself, with its own TLS 1.3 client pinned to
+the ISRG roots, which is what the sign-in path now uses.
+
+So this guard pins four things:
 
   1. The failure path builds its message from the one signal that separates the
      two honest cases without waiting: the connection profile. No profile means
      the device really is offline; a profile with internet access means the
-     refusal is the platform's. The offline branch says "offline", the platform
-     branch names the handshake and the offline list.
+     request was refused somewhere between here and Proton.
   2. The accusation is gone: no `Catch` in the API client returns "Check the
      connection".
-  3. The user-facing documents agree with the measurement: README, the About page
-     and the sign-in page all say the platform cannot complete Proton's
-     handshake, rather than promising a sign-in that cannot happen.
+  3. The stale excuse is gone too: the message must not claim the platform cannot
+     reach Proton, because this app no longer depends on the platform's stack for
+     that.
+  4. The user-facing documents agree with both measurements: README, the About
+     page and the sign-in page say the connection to Proton is made by the app's
+     own TLS 1.3 client with a pinned chain, rather than either promising a
+     sign-in that cannot happen or denying the one that can.
 
 Reverting any of these must make this script fail.
 """
@@ -85,9 +91,17 @@ def main() -> int:
     check(
         reachability != "" and "offline" in reachability.lower()
         and "handshake" in reachability.lower(),
-        "the offline branch and the platform branch are both present",
-        "The offline branch names being offline; the platform branch names the "
-        "handshake it cannot complete and points at the offline server list.",
+        "the offline branch and the reachable branch are both present",
+        "The offline branch names being offline; the other branch names the "
+        "handshake or the network as what refused, and points at the offline "
+        "server list.",
+    )
+    check(
+        "windows phone 8.1 cannot" not in reachability.lower()
+        and "cannot complete" not in reachability.lower(),
+        "the message no longer claims the platform cannot reach Proton",
+        "The app completes that handshake itself, so the claim is stale: it would "
+        "tell the user the one thing that is now not the reason.",
     )
     accused = [
         line.strip()
@@ -108,10 +122,25 @@ def main() -> int:
     ):
         check(
             "handshake" in text and "proton" in text,
-            f"{title} states the platform cannot complete Proton's handshake",
-            "The app must not promise a sign-in the platform cannot deliver; the "
-            "measurement belongs next to the feature it disables.",
+            f"{title} states that the app makes the handshake with Proton itself",
+            "The platform's stack still cannot, and the app must not promise a "
+            "sign-in it cannot deliver -- but it now can, so the document has to "
+            "say which side of the seam the handshake happens on.",
         )
+        check(
+            "tls 1.3" in text,
+            f"{title} names the TLS 1.3 client that does it",
+            "A hand-written TLS stack and a pinned certificate chain are facts a "
+            "user of an unofficial VPN client is entitled to read, not buried.",
+        )
+
+    check(
+        "isrg" in readme,
+        "README names the pinned certificate authority",
+        "The pin is the reason a Proton certificate rotation does not brick the "
+        "app and the reason an untrusted chain is refused; it belongs in the "
+        "document that describes the security posture.",
+    )
 
     print("honesty: " + ("OK" if not failures else f"FAILED ({len(failures)} problem(s))"))
     return 0 if not failures else 1

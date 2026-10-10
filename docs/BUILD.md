@@ -63,6 +63,41 @@ print('\n'.join(sorted(zipfile.ZipFile(p).namelist())))"
   the `.appxupload` with the Windows Phone Application Deployment tool. Sideloaded
   unsigned packages require the device in developer mode.
 
+### Emulator, headless, from Git Bash
+
+The emulator, the deployment and the log retrieval all drive from the command
+line, which is how the on-device runs recorded below were made:
+
+```bash
+XDE="/c/Program Files (x86)/Microsoft XDE/8.1/XDE.exe"
+AD="/c/Program Files (x86)/Microsoft SDKs/Windows Phone/v8.1/Tools/AppDeploy/AppDeployCmd.exe"
+ISET="/c/Program Files (x86)/Microsoft SDKs/Windows Phone/v8.1/Tools/IsolatedStorageExplorerTool/ISETool.exe"
+
+powershell -NoProfile -Command "Get-VM | Select-Object -ExpandProperty Name"   # the VM's name
+"$XDE" //name "Emulator 8.1 U1 WVGA 4 inch 512MB(IT).vincenzo" //snapshot       # boot it; waits ~1 min
+
+# Deploy the *x86* package, which is the architecture the emulator runs.
+"$AD" //installlaunch "<...>\AppPackages\Proton VPN WP_1.0.0.0_x86_Debug_Test\Proton VPN WP_1.0.0.0_x86_Debug.appx" //targetdevice:xd
+
+# Read the log back out (see "Reading the log" for the store and its paths).
+"$ISET" ts xd 0a59a853-0bc1-4932-a95e-3b293212e9ec .bug-hunter/emulator-store
+```
+
+Three things bite here:
+
+- **Every leading-slash flag needs a second slash.** Git Bash rewrites `/name`
+  into `C:/Program Files/Git/name`, and `XDE.exe` answers with its usage text
+  instead of booting. The same rewrite is why MSBuild wants `//p:` above.
+- **`XDE.exe` takes the VM by name, not by VHD path.** `/vhd` is only read when
+  the VM does not exist yet, so passing a path to an existing VM also just
+  prints the usage text.
+- **Deploy x86 to the emulator.** `AnyCPU` and `ARM` packages install, but only
+  the `x86` one runs, and a deploy of the wrong architecture succeeds silently.
+
+The app must be left in the foreground for a run to happen: `//installlaunch`
+starts it, but the emulator window has to keep focus, and the desktop must not be
+locked or in use by something else.
+
 ## Verification, in the order to run it
 
 1. **Crypto vectors** (mandatory after any edit to `Sha512.vb`, `Bcrypt.vb`,
@@ -197,27 +232,54 @@ print('\n'.join(sorted(zipfile.ZipFile(p).namelist())))"
 
     Expected: `network diagnosis: OK`. `ConnectivityService.DiagnoseAsync` gives a
     failed request a layered answer in the log -- connection profile, DNS, TCP,
-    TLS 1.2 against Proton *and* against a control host, then HTTP -- because
-    `0x80072EFD` reads identically whether the name did not resolve, the device has
-    no internet, Proton alone is unreachable, or the handshake was refused. The
-    layer that fails is the answer. The 2026-10-10 emulator run:
+    the app's own TLS 1.3 client, then the platform's Schannel *and* a control
+    host, then HTTP -- because `0x80072EFD` reads identically whether the name did
+    not resolve, the device has no internet, Proton alone is unreachable, or the
+    handshake was refused. The layer that fails is the answer. The 2026-10-10
+    emulator run, taken with the bug below still in the tree:
 
     ```
+    netdiag: profile Internet: yes
+    netdiag: profile Network: CoreSystem_NIC_01
     netdiag: dns account.proton.me -> 185.70.42.36
-    netdiag: tcp account.proton.me:443 -> connected in 83 ms
-    netdiag: tls tls12 account.proton.me failed: ... 0x80090326
-    netdiag: tls tls12 control www.microsoft.com -> handshake in 1866 ms
+    netdiag: tcp account.proton.me:443 -> connected in 118 ms
+    netdiag: tls tls13 (managed) account.proton.me failed: Arithmetic operation resulted in an overflow.
+    netdiag: tls tls12 platform account.proton.me failed: ... 0x80090326
+    netdiag: tls tls12 control www.microsoft.com -> handshake in 2035 ms
     netdiag: http control www.msftconnecttest.com -> 200
     netdiag: http proton failed: ... 0x80072EFD
     ```
 
-    DNS resolves and TCP connects, plain HTTP answers, TLS 1.2 works against a
-    host that still offers ECDHE+CBC, and the same handshake against Proton is
-    refused -- the one layer that differs is the suite negotiation. Proton accepts
-    only ECDHE+AES-GCM/ChaCha20 suites at TLS 1.2, and Windows 8.1/Windows Phone
-    8.1's Schannel offers none of them for an RSA server certificate, so the
-    intersection is empty and this platform cannot complete the handshake at all.
-    `README.md` states that consequence.
+    The first four lines are the app's own client, and they name the layer the
+    platform's stack could not: DNS resolves, TCP connects, the control host
+    completes the same handshake and answers HTTP, and Proton's handshake is
+    refused (`0x80090326`). The `(managed)` line is the one that mattered -- it is
+    the app's TLS client, and on that run it threw `OverflowException`.
+
+    **That was a real, device-only bug.** The crypto is written to wrap (SHA-256's
+    round additions, GHASH over `GF(2^128)`, the X25519 ladder), and VB checks
+    integer overflow unless the project says otherwise. The `.vbproj` did not, so
+    the check fired on the device in the first handshake. No `tools/` script could
+    have shown it: they pass `/removeintchecks+` to `vbc` themselves. The fix is
+    `<RemoveIntegerChecks>true</RemoveIntegerChecks>` in the project file, and
+    `tools/tls13_check.py` now fails if it is removed or a configuration re-enables
+    the check. After it, the same emulator run signs in:
+
+    ```
+    Info: nettest: attempting a sign-in with a throwaway identity
+    Info: HTTP 200 POST account.proton.me/api/auth/info
+    Info: HTTP 422 POST account.proton.me/api/auth
+    ```
+
+    `200` from `/api/auth/info` is Proton answering over the app's TLS 1.3
+    handshake, and `422` is Proton rejecting the throwaway account at the API
+    level -- a request that reached the service, which is the whole point.
+
+    Proton accepts only ECDHE+AES-GCM/ChaCha20 suites at TLS 1.2, and Windows
+    8.1/Windows Phone 8.1's Schannel offers none of them for an RSA server
+    certificate, so the intersection is empty and the platform cannot complete
+    that handshake at all. `README.md` states that consequence, and names the
+    client that does complete it instead.
 
 ## Reading the log
 

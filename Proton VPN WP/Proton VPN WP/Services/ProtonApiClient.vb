@@ -1,32 +1,47 @@
 ' HTTP access to Proton's account and VPN APIs.
 '
-' TLS: Windows.Web.Http validates server certificates by default and this client
-' never installs a handler that relaxes that. There is exactly one place where
-' certificates would be touched and it does not exist here, on purpose.
+' TLS: these requests run over the app's own TLS 1.3 client (Tls.TlsHttpClient),
+' not over Windows.Web.Http. They have to: Windows Phone 8.1's Schannel offers no
+' cipher suite Proton's edge accepts, so the platform's stack is refused before a
+' byte is sent (see the README and the ledger under .superpowers/sdd). The client
+' authenticates the server before any application byte is trusted -- the
+' CertificateVerify signature is checked with the leaf key and the chain is
+' verified against the pinned ISRG roots -- and it has no mode that skips that.
 '
 ' The endpoint names and the x-pm-appversion header are the parts most likely to
 ' drift as Proton evolves their API; every call returns an ApiResult instead of
 ' throwing so the UI can fall back to the bundled catalogue.
-Imports System.Threading
 Imports System.Threading.Tasks
 Imports Proton_VPN_WP.Models
 Imports Windows.Data.Json
-Imports Windows.Storage.Streams
-Imports Windows.Web.Http
+
+' Tls.* is referenced fully qualified rather than through an Imports clause: the
+' shipping project's RootNamespace makes `Imports Tls` resolve nowhere, and the
+' desktop harness compiles the same Tls sources without a root namespace.
 
 Namespace Services
     Friend NotInheritable Class ProtonApiClient
-        Implements IDisposable
 
         ''' <summary>Account (authentication) API root.</summary>
         Friend Const AuthHost As String = "https://account.proton.me/api"
         ''' <summary>VPN API root. The legacy api.protonvpn.ch host was retired in 2025.</summary>
         Friend Const VpnHost As String = "https://vpn-api.proton.me"
 
-        Private Const AppVersion As String = "web-vpn@5.0.0"
-        Private Const RequestTimeout As Integer = 30
+        ''' <summary>
+        ''' The app identifier Proton's API accepts. It is not cosmetic: the edge
+        ''' rejects an unknown product with 400 Code 5002 ("Invalid app version")
+        ''' before it looks at the request at all, and rejects a product whose
+        ''' version it no longer supports with 422 Code 5003. `windows-vpn@5.0.0.0`
+        ''' is the lowest accepted version of the VPN product as measured on
+        ''' 2026-10-10; the value this app shipped with, `web-vpn@5.0.0`, is not a
+        ''' product Proton's account API knows.
+        ''' </summary>
+        Private Const AppVersion As String = "windows-vpn@5.0.0.0"
 
-        Private ReadOnly _http As New HttpClient()
+        ''' <summary>Seconds after which a request that has not answered is abandoned.</summary>
+        Private Const RequestTimeoutSeconds As Integer = 30
+
+        Private Const HttpsPort As Integer = 443
 
         ''' <summary>UID of the currently signed-in account, sent as x-pm-uid.</summary>
         Friend Property UserId As String
@@ -82,88 +97,96 @@ Namespace Services
         Private Async Function PostJsonAsync(url As String, body As JsonObject,
                                              Optional uid As String = Nothing,
                                              Optional token As String = Nothing) As Task(Of ApiResult(Of JsonObject))
-            Return Await SendAsync(HttpMethod.Post, url, body.Stringify(), uid, token)
+            Return Await SendAsync("POST", url, body.Stringify(), uid, token)
         End Function
 
         Private Async Function GetJsonAsync(url As String) As Task(Of ApiResult(Of JsonObject))
-            Return Await SendAsync(HttpMethod.Get, url, Nothing, UserId, AccessToken)
+            Return Await SendAsync("GET", url, Nothing, UserId, AccessToken)
         End Function
 
         ' The body parameter must NOT be called "json": VB is case-insensitive, so a
         ' local named json would shadow the Json helper class used below.
-        Private Async Function SendAsync(method As HttpMethod, url As String, jsonBody As String,
+        Private Async Function SendAsync(method As String, url As String, jsonBody As String,
                                          uid As String, token As String) As Task(Of ApiResult(Of JsonObject))
             Dim effectiveUid As String = If(uid, UserId)
             Dim effectiveToken As String = If(token, AccessToken)
+            Dim transport As Tls.SocketTlsTransport = Nothing
 
             Try
-                Using request As New HttpRequestMessage(method, New Uri(url))
-                    request.Headers.Add("x-pm-appversion", AppVersion)
-                    request.Headers.Add("Accept", "application/vnd.protonmail.v1+json")
-                    If Not String.IsNullOrEmpty(effectiveUid) Then request.Headers.Add("x-pm-uid", effectiveUid)
-                    If Not String.IsNullOrEmpty(effectiveToken) Then
-                        request.Headers.Authorization = New Windows.Web.Http.Headers.HttpCredentialsHeaderValue("Bearer", effectiveToken)
-                    End If
-                    If jsonBody IsNot Nothing Then
-                        request.Content = New HttpStringContent(jsonBody, UnicodeEncoding.Utf8, "application/json")
-                    End If
+                Dim headers As New System.Collections.Generic.Dictionary(Of String, String)()
+                headers("Accept") = "application/vnd.protonmail.v1+json"
+                headers("x-pm-appversion") = AppVersion
+                If Not String.IsNullOrEmpty(effectiveUid) Then headers("x-pm-uid") = effectiveUid
+                If Not String.IsNullOrEmpty(effectiveToken) Then headers("Authorization") = "Bearer " & effectiveToken
 
-                    Using cancellation As New CancellationTokenSource(TimeSpan.FromSeconds(RequestTimeout))
-                        ' The response owns a network stream, so it is disposed with the
-                        ' request rather than left to finalisation.
-                        Using response As HttpResponseMessage = Await _http.SendRequestAsync(request).AsTask(cancellation.Token)
-                            Dim text As String = Await response.Content.ReadAsStringAsync().AsTask(cancellation.Token)
+                transport = Await Tls.SocketTlsTransport.ConnectAsync(New Uri(url).Host, HttpsPort)
 
-                            Log.Info("HTTP " & CInt(response.StatusCode) & " " & method.ToString() & " " & SafePath(url))
+                Dim sent As Task(Of Tls.HttpReply)
+                If method = "GET" Then
+                    sent = Tls.TlsHttpClient.GetAsync(transport, New SystemRandomSource(), url, headers)
+                Else
+                    sent = Tls.TlsHttpClient.PostAsync(transport, New SystemRandomSource(), url, jsonBody, headers)
+                End If
 
-                            If String.IsNullOrEmpty(text) Then
-                                Return ApiResult(Of JsonObject).Failure("Empty response from the server (" & CInt(response.StatusCode) & ").")
-                            End If
+                ' The request as a whole is bounded. A connection that opens and then
+                ' goes quiet would otherwise leave the caller pending forever: closing
+                ' the socket is what aborts the stalled read.
+                Dim finished As Task = Await Task.WhenAny(sent, Task.Delay(TimeSpan.FromSeconds(RequestTimeoutSeconds)))
+                If Not Object.ReferenceEquals(finished, sent) Then
+                    transport.Close()
+                    Return ApiResult(Of JsonObject).Failure("The request to Proton timed out.")
+                End If
 
-                            Dim parsed As JsonObject = Json.TryParseObject(text)
-                            If parsed Is Nothing Then
-                                Return ApiResult(Of JsonObject).Failure("The server returned a response the app could not read.")
-                            End If
+                Dim reply As Tls.HttpReply = Await sent
+                Log.Info("HTTP " & reply.StatusCode.ToString() & " " & method & " " & SafePath(url))
 
-                            Dim code As Integer = Json.TryInt(parsed, "Code", 0)
-                            If code = 1000 Then Return ApiResult(Of JsonObject).Success(parsed)
+                Dim text As String = reply.Body
+                If String.IsNullOrEmpty(text) Then
+                    Return ApiResult(Of JsonObject).Failure("Empty response from the server (" & reply.StatusCode.ToString() & ").")
+                End If
 
-                            Dim errorText As String = Json.TryString(parsed, "Error")
-                            If String.IsNullOrEmpty(errorText) Then errorText = DescribeCode(code)
-                            Return ApiResult(Of JsonObject).Failure(errorText & " (code " & code.ToString() & ")")
-                        End Using
-                    End Using
-                End Using
-            Catch ex As TaskCanceledException
-                Return ApiResult(Of JsonObject).Failure("The request to Proton timed out.")
+                Dim parsed As JsonObject = Json.TryParseObject(text)
+                If parsed Is Nothing Then
+                    Return ApiResult(Of JsonObject).Failure("The server returned a response the app could not read.")
+                End If
+
+                Dim code As Integer = Json.TryInt(parsed, "Code", 0)
+                If code = 1000 Then Return ApiResult(Of JsonObject).Success(parsed)
+
+                Dim errorText As String = Json.TryString(parsed, "Error")
+                If String.IsNullOrEmpty(errorText) Then errorText = DescribeCode(code)
+                Return ApiResult(Of JsonObject).Failure(errorText & " (code " & code.ToString() & ")")
             Catch ex As Exception
                 Log.Warn("Network request failed: " & ex.GetType().Name & " " & ex.Message)
                 ' Log-only and deliberately not awaited: the caller has an error to show
                 ' and must not wait ~15s for a diagnosis. It runs at most once per 20s,
-                ' and it is what turns "0x80072EFD" into the layer that refused.
+                ' and it is what turns a bare transport failure into the layer that refused.
                 ConnectivityService.DiagnoseAsync("the request to " & SafePath(url) & " did not reach the host", url)
                 Return ApiResult(Of JsonObject).Failure(ReachabilityFailureMessage())
+            Finally
+                If transport IsNot Nothing Then transport.Close()
             End Try
         End Function
 
         ''' <summary>
         ''' The message to show when a request did not reach Proton.
         '''
-        ''' "Check the connection and try again" blamed the user's network for what is,
-        ''' on this platform, the platform's own limit: Windows Phone 8.1 offers no
-        ''' cipher suite Proton's edge accepts (see the README), so the handshake is
-        ''' refused before a request is sent, on a network that works. The connection
-        ''' profile is the one signal available without waiting, and it separates the
-        ''' two honest answers: no profile means the device really is offline; a profile
-        ''' with internet access means the refusal is the platform's.
+        ''' "Check the connection and try again" blamed the user's network for what was,
+        ''' on this platform, the platform's own limit -- and now that the app carries
+        ''' its own TLS 1.3 client, the platform is no longer the reason a request can
+        ''' fail. The connection profile is still the one signal available without
+        ''' waiting, and it separates the two answers worth telling apart: no profile
+        ''' means the device really is offline; a profile with internet access means the
+        ''' request was refused somewhere between here and Proton -- the handshake (an
+        ''' untrusted certificate, an alert), DNS, or Proton itself -- and the offline
+        ''' server list still works either way.
         ''' </summary>
         Private Shared Function ReachabilityFailureMessage() As String
             If Not ConnectivityService.HasInternetAccess() Then
                 Return "You appear to be offline. Connect to a network and try again."
             End If
-            Return "This device has a connection, but Windows Phone 8.1 cannot complete " &
-                   "the secure handshake Proton's servers now require, so signing in and " &
-                   "the live server list are unavailable here. The offline server list still works."
+            Return "This device has a connection, but the request to Proton did not complete: " &
+                   "the secure handshake or the network refused it. The offline server list still works."
         End Function
 
         ''' <summary>Logs the endpoint without the query string, which can carry tokens.</summary>
@@ -181,15 +204,13 @@ Namespace Services
                 Case 8002 : Return "Incorrect login credentials."
                 Case 1001 : Return "Two-factor authentication is required."
                 Case 1002 : Return "Two-factor authentication is required."
+                Case 5002 : Return "Proton rejected this app's version."
+                Case 5003 : Return "Proton no longer supports this app's version."
                 Case 12087 : Return "Too many attempts. Try again later."
                 Case 2001 : Return "The account is not valid."
                 Case Else : Return "Proton rejected the request."
             End Select
         End Function
-
-        Friend Sub Dispose() Implements IDisposable.Dispose
-            _http.Dispose()
-        End Sub
 
     End Class
 End Namespace

@@ -27,29 +27,54 @@ a claim that a tunnel is up.
 
 ## Proton's API and Windows Phone 8.1's TLS
 
-**Sign-in and the live server list cannot work from this platform any more.**
-Proton's API edge accepts, at TLS 1.2, only `ECDHE_RSA_WITH_AES_256_GCM_SHA384`,
-`ECDHE_RSA_WITH_AES_128_GCM_SHA256` and `ECDHE_RSA_WITH_CHACHA20_POLY1305` (measured
-on 2026-10-10: every other suite, including all CBC ones, is refused with a
-handshake alert). Windows 8.1 and Windows Phone 8.1 offer no ECDHE+AES-GCM suite
-for an RSA server certificate -- per [TLS Cipher Suites in Windows
+**The platform's TLS stack cannot reach Proton, so the app speaks TLS 1.3
+itself.** The measurement is unchanged: Proton's API edge accepts, at TLS 1.2,
+only `ECDHE_RSA_WITH_AES_256_GCM_SHA384`, `ECDHE_RSA_WITH_AES_128_GCM_SHA256` and
+`ECDHE_RSA_WITH_CHACHA20_POLY1305` (measured on 2026-10-10: every other suite,
+including all CBC ones, is refused with a handshake alert). Windows 8.1 and
+Windows Phone 8.1 offer no ECDHE+AES-GCM suite for an RSA server certificate --
+per [TLS Cipher Suites in Windows
 8.1](https://learn.microsoft.com/en-us/windows/win32/secauthn/tls-cipher-suites-in-windows-8-1)
 the only ECDHE-GCM suites it has are ECDSA ones -- and Proton presents an RSA
-certificate. The intersection is empty, so the handshake is refused before a
-single request is sent.
+certificate. The intersection is empty, so Schannel is refused before a single
+request is sent.
 
-That is why the app reports "Could not reach Proton" even on a working network.
-The measured chain, from the 8.1 emulator's own log: DNS resolves, TCP to
-`account.proton.me:443` connects in ~80 ms, TLS 1.2 to a host that still offers
-ECDHE+CBC handshakes fine, and the same handshake to Proton fails with
-`SEC_E_ILLEGAL_MESSAGE` (0x80090326). Nothing in this app can widen the suite set:
-Windows Phone 8.1 exposes no API for cipher suites, and Schannel's list is an
-operating-system property.
+That is why the request is not left to `Windows.Web.Http`. The app carries its
+own TLS 1.3 client over a raw socket: X25519, AES-128-GCM, SHA-256 with
+HMAC/HKDF, RSA-PSS and PKCS#1 v1.5 verification and X.509 chain checking, all
+hand-written because Windows Phone 8.1 also has no
+`System.Security.Cryptography`. It offers exactly one suite
+(`TLS_AES_128_GCM_SHA256`), one group (`x25519`), one signature scheme
+(`rsa_pss_rsae_sha256`) and ALPN `http/1.1`.
 
-What still works: the bundled offline catalogue (64 logical servers), the server
-browser, the IKEv2/OpenVPN profile values and the OpenVPN export. Only the
-account-bound paths -- `Sign in`, the live catalogue refresh and
-`/vpn/credentials` -- are gone.
+The server is authenticated before any application byte is trusted: the
+`CertificateVerify` signature is checked with the leaf key and the chain is
+verified against the **pinned ISRG roots** (a root pin, not a leaf pin, so
+Proton's certificate rotation does not brick the app). A tag mismatch, an
+unexpected server choice, a missing proof or a chain error aborts the connection
+-- there is no mode that continues anyway.
+
+Measured on 2026-10-10 with `python tools/run_tls_harness.py`, which compiles the
+shipping sources and drives the live edge: TLS 1.3 handshake in suite `0x1301`
+and `HTTP 200` carrying Proton's SRP modulus from `account.proton.me`, while
+`www.microsoft.com` is refused because the pinned anchors do not sign its chain.
+The 8.1 emulator's own log shows the same exchange from the shipping sign-in
+path: `HTTP 200 POST account.proton.me/api/auth/info` and then `HTTP 422 POST
+account.proton.me/api/auth` -- Proton answering an account that does not exist --
+while the platform's own stack, in the same diagnosis run, still fails with
+`0x80090326`.
+
+The emulator is also where the one bug no desktop check could have found
+appeared. VB checks integer overflow by default, and the crypto here is written
+to wrap, so the device build threw `OverflowException` inside the first
+handshake until the project was compiled with integer checks removed; the
+guards in `tools/` pass `/removeintchecks+` to the compiler themselves, so every
+one of them was green either way.
+
+Two things this does not free the app from. It still identifies itself with an
+`x-pm-appversion` Proton accepts (`windows-vpn@5.0.0.0`; an unknown product is
+answered with `400 Code 5002` before authentication is even considered). And it
+breaks if Proton changes its API -- this is an unofficial client.
 
 ## What it does today
 
@@ -89,6 +114,8 @@ Full instructions, including how to deploy to a device or the emulator, are in
 
 ```bash
 python tools/run_srp_harness.py     # crypto vectors: expect "VB harness vs Python reference: OK"
+python tools/run_tls_crypto_harness.py   # SHA-256/HKDF/X25519/AES-GCM/RSA/X.509 vectors
+python tools/run_tls_harness.py     # live TLS 1.3 handshake: expect "live TLS handshake: OK"
 python tools/xaml_check.py          # resource keys and bindings: expect "XAML check OK"
 python tools/ocr_check.py           # UI strings: expect no mismatches
 ```
@@ -112,6 +139,9 @@ implementation on every change.
 - Access tokens, refresh tokens and the OpenVPN/IKEv2 password are encrypted
   with `DataProtectionProvider` (`LOCAL=user`) before they are written to
   `ApplicationData`, and can be erased from Settings.
+- TLS is terminated in-process by the client described above, pinned to the ISRG
+  roots. Certificate validation is not delegated to the platform and there is no
+  override, no "accept anyway" path and no configured exception.
 - No analytics, no third-party endpoints, no telemetry. The only network traffic
   is to Proton's own API.
 - Logs record method names, status codes and error types — never secrets,
@@ -122,8 +152,10 @@ implementation on every change.
 ```
 Proton VPN WP/Proton VPN WP/
   Models/       data types mirroring Proton's API and the app's own state
-  Services/     crypto (Sha512, Bcrypt, SrpClient), API client, SRP auth,
-                catalogue, settings/vault, connectivity, VPN profile builder
+  Services/     crypto (Sha256, Sha512, Hmac, Hkdf, X25519, Aes, Gcm, RsaVerify,
+                Asn1, X509), the TLS 1.3 client and its HTTP/1.1 layer, API
+                client, SRP auth, catalogue, settings/vault, connectivity,
+                VPN profile builder
   ViewModels/   one view model per page, no XAML knowledge
   Views/        the seven pages (XAML + code-behind)
   Data/         generated offline server catalogue

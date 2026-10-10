@@ -8,11 +8,8 @@ Imports Windows.Storage.Streams
 
 Namespace Services
 
-    Friend Interface IRandomSource
-        Function NextBytes(count As Integer) As Byte()
-    End Interface
-
-    ''' <summary>WinRT CSPRNG, the production implementation.</summary>
+    ''' <summary>WinRT CSPRNG, the production implementation. The IRandomSource interface
+    ''' itself lives in IRandomSource.vb so the desktop harness can compile it.</summary>
     Friend NotInheritable Class SystemRandomSource
         Implements IRandomSource
 
