@@ -70,6 +70,25 @@ Namespace Services
                 Return ApiResult(Of ProtonSession).Failure("Proton did not return the data needed for a secure sign-in.")
             End If
 
+            ' The SRP version picks the password derivation, so it is read and not
+            ' assumed. A version below 3 has no salt of its own that this app can
+            ' derive from, so the attempt stops here rather than sending a proof built
+            ' from the wrong hash -- which the server answers exactly like a wrong
+            ' password.
+            Dim srpVersion As Integer = Json.TryInt(infoResult.Value, "Version", 0)
+            If srpVersion < 3 Then
+                Return ApiResult(Of ProtonSession).Failure("This app does not know SRP version " &
+                                                          srpVersion.ToString() & ", so the sign-in was stopped.")
+            End If
+
+            ' A proof-of-work challenge is a requirement this client does not implement
+            ' at all. Sending the request anyway produces a refusal Proton words like a
+            ' wrong password, so the real reason is named here instead.
+            If Json.TryObject(infoResult.Value, "Challenge") IsNot Nothing OrElse
+               Not String.IsNullOrEmpty(Json.TryString(infoResult.Value, "Challenge")) Then
+                Return ApiResult(Of ProtonSession).Failure("Proton asked this device to solve a challenge this app cannot solve, so the sign-in was stopped.")
+            End If
+
             Dim modulus As Byte()
             Dim serverEphemeral As Byte()
             Dim salt As Byte()
@@ -86,7 +105,13 @@ Namespace Services
             Dim proofs As SrpProofs
             Try
                 ' The password itself is never stored or sent; only the derived proof.
-                Dim hashedPassword As Byte() = SrpClient.HashPasswordVersion3(Encoding.UTF8.GetBytes(password), salt, modulus)
+                ' Only for the version Proton named: an unknown derivation is refused
+                ' rather than guessed.
+                Dim hashedPassword As Byte() = SrpClient.HashPassword(srpVersion, Encoding.UTF8.GetBytes(password), salt, modulus)
+                If hashedPassword Is Nothing Then
+                    Return ApiResult(Of ProtonSession).Failure("This app does not know SRP version " &
+                                                              srpVersion.ToString() & ", so the sign-in was stopped.")
+                End If
                 Dim clientSecret As System.Numerics.BigInteger = SrpSecretGenerator.GenerateClientSecret(_random, modulus, bitLength)
                 proofs = SrpClient.GenerateProofs(bitLength, modulus, serverEphemeral, hashedPassword, clientSecret)
             Catch ex As Exception

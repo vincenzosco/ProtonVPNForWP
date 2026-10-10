@@ -41,6 +41,28 @@ Namespace Crypto
         End Function
 
         ''' <summary>
+        ''' The password hash for one SRP version, or Nothing for a version this app
+        ''' does not implement.
+        '''
+        ''' go-srp's `NewAuthForVerifier` labels version 4 as "hash version is 4" and
+        ''' then calls `hashPasswordVersion3`, and `GenerateProofs` does not branch on
+        ''' the version at all, so 3 and 4 share one derivation today. That is why the
+        ''' version is read from /auth/info rather than assumed: the field is
+        ''' Proton's, a client that hardcodes the derivation cannot notice the day it
+        ''' stops being right, and the proof it would then send is one the server
+        ''' answers exactly like a wrong password.
+        ''' </summary>
+        Friend Shared Function HashPassword(version As Integer, password As Byte(), salt As Byte(), modulus As Byte()) As Byte()
+            Select Case version
+                Case 3, 4
+                    Return HashPasswordVersion3(password, salt, modulus)
+                Case Else
+                    ' Fail closed, and let the caller say which version stopped it.
+                    Return Nothing
+            End Select
+        End Function
+
+        ''' <summary>
         ''' go-srp `hashPasswordVersion3` (auth versions 3 and 4):
         ''' expandHash(bcrypt("$2y$10$" + dotSlashBase64(salt || "proton"), password) || modulus).
         ''' </summary>
