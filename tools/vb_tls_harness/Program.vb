@@ -26,7 +26,7 @@ Module Program
             For i As Integer = 0 To 19
                 key(i) = &HBB
             Next
-            Console.WriteLine("hmac_sha256=" & CryptoBytes.ToHex(Hmac.Sha256(key, System.Text.Encoding.ASCII.GetBytes("Hi There"))))
+            Console.WriteLine("hmac_sha256=" & CryptoBytes.ToHex(Hmac.Compute(key, System.Text.Encoding.ASCII.GetBytes("Hi There"))))
 
             ' RFC 5869 Test Case 1.
             Dim ikm As Byte() = New Byte(21) {}

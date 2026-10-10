@@ -15,7 +15,7 @@ Namespace Crypto
         Friend Shared Function Extract(salt As Byte(), ikm As Byte()) As Byte()
             If salt Is Nothing OrElse salt.Length = 0 Then salt = New Byte(HashLen - 1) {}
             If ikm Is Nothing Then ikm = New Byte() {}
-            Return Hmac.Sha256(salt, ikm)
+            Return Hmac.Compute(salt, ikm)
         End Function
 
         ''' <summary>HKDF-Expand: T(1) || T(2) ... truncated to <paramref name="length"/>.</summary>
@@ -26,7 +26,7 @@ Namespace Crypto
             Dim offset As Integer = 0
             Dim counter As Integer = 1
             While offset < length
-                Dim block As Byte() = Hmac.Sha256(prk, CryptoBytes.Concat(t, info, New Byte() {CByte(counter)}))
+                Dim block As Byte() = Hmac.Compute(prk, CryptoBytes.Concat(t, info, New Byte() {CByte(counter)}))
                 Dim take As Integer = System.Math.Min(block.Length, length - offset)
                 Array.Copy(block, 0, okm, offset, take)
                 offset += take
