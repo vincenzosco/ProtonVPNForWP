@@ -300,6 +300,29 @@ Nothing else needs the emulator window: the log comes back out through
     strongest of the runs -- the shipped binary, the architecture the F5 path
     picks, driven from the editor the maintainer already has open.
 
+    **And the real phone, on 2026-10-10.** The same tree built as `Debug|ARM`,
+    installed and launched over USB (`AppDeployCmd //installlaunch <appx>
+    //targetdevice:de`), signed in with the real account on the connected device.
+    The session, pulled back out with `ISETool`:
+
+    ```
+    Info: HTTP 200 POST account.proton.me/api/auth/info
+    Info: HTTP 422 POST account.proton.me/api/auth
+    Warning: sign-in refused: code 2028 (Proton has temporarily limited this account.)
+    ```
+
+    The warning line is the one the sign-in path writes now: it names Proton's
+    code and a fixed reason, and it never carries Proton's own `Error` text --
+    that text quotes the account identifiers back into a file the user shares.
+    The user-facing message is the other way round, and prefers Proton's text,
+    which for this code is the explanation and the appeal path.
+
+    `2028` is Proton's anti-abuse limitation on the account, not a defect in this
+    app: both HTTP lines are Proton answering, over the app's own TLS 1.3
+    handshake, and the code is the one the refusal table names. **A limited
+    account is not retried** -- each further attempt can extend the limitation --
+    so this is one attempt and the result is the account, not the client.
+
     Proton accepts only ECDHE+AES-GCM/ChaCha20 suites at TLS 1.2, and Windows
     8.1/Windows Phone 8.1's Schannel offers none of them for an RSA server
     certificate, so the intersection is empty and the platform cannot complete
@@ -343,6 +366,13 @@ ISET="/c/Program Files (x86)/Microsoft SDKs/Windows Phone/v8.1/Tools/IsolatedSto
 
 The snapshot is written into the path you give (the `Local` store by default), so
 the file above appears as `.bug-hunter/device-store/logs/app.log`.
+
+On the 2026-10-10 device run `ts de` died inside the tool -- `0xC0000005`, which
+reaches Git Bash as exit code `-1073741819`, with no output at all -- while
+`dir de` on the same phone worked and only the deeper `dir:logs` crashed with it.
+`ts deviceindex:0 0a59a853-...` completed, index `0` being the connected phone
+(`EnumerateDevices` lists it as `Device`). Worth knowing before concluding that
+nothing was recorded: the failure is in the retrieval, not in the log.
 
 The file is capped at 64 KB (`LogFilePolicy.MaxBytes`); once it passes that the
 oldest half is dropped, rather than being left to grow. It never holds a
