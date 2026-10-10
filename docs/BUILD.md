@@ -189,6 +189,36 @@ print('\n'.join(sorted(zipfile.ZipFile(p).namelist())))"
    the load stops degrading to the bundle, or if either view model stops
    reporting the failure itself.
 
+11. **Network-failure diagnosis:**
+
+    ```bash
+    python tools/netdiag_check.py
+    ```
+
+    Expected: `network diagnosis: OK`. `ConnectivityService.DiagnoseAsync` gives a
+    failed request a layered answer in the log -- connection profile, DNS, TCP,
+    TLS 1.2 against Proton *and* against a control host, then HTTP -- because
+    `0x80072EFD` reads identically whether the name did not resolve, the device has
+    no internet, Proton alone is unreachable, or the handshake was refused. The
+    layer that fails is the answer. The 2026-10-10 emulator run:
+
+    ```
+    netdiag: dns account.proton.me -> 185.70.42.36
+    netdiag: tcp account.proton.me:443 -> connected in 83 ms
+    netdiag: tls tls12 account.proton.me failed: ... 0x80090326
+    netdiag: tls tls12 control www.microsoft.com -> handshake in 1866 ms
+    netdiag: http control www.msftconnecttest.com -> 200
+    netdiag: http proton failed: ... 0x80072EFD
+    ```
+
+    DNS resolves and TCP connects, plain HTTP answers, TLS 1.2 works against a
+    host that still offers ECDHE+CBC, and the same handshake against Proton is
+    refused -- the one layer that differs is the suite negotiation. Proton accepts
+    only ECDHE+AES-GCM/ChaCha20 suites at TLS 1.2, and Windows 8.1/Windows Phone
+    8.1's Schannel offers none of them for an RSA server certificate, so the
+    intersection is empty and this platform cannot complete the handshake at all.
+    `README.md` states that consequence.
+
 ## Reading the log
 
 Every session appends to `logs\app.log` inside the app's local folder, and the

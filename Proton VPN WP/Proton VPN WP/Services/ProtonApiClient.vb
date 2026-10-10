@@ -138,6 +138,10 @@ Namespace Services
                 Return ApiResult(Of JsonObject).Failure("The request to Proton timed out.")
             Catch ex As Exception
                 Log.Warn("Network request failed: " & ex.GetType().Name & " " & ex.Message)
+                ' Log-only and deliberately not awaited: the caller has an error to show
+                ' and must not wait ~15s for a diagnosis. It runs at most once per 20s,
+                ' and it is what turns "0x80072EFD" into the layer that refused.
+                ConnectivityService.DiagnoseAsync("the request to " & SafePath(url) & " did not reach the host", url)
                 Return ApiResult(Of JsonObject).Failure("Could not reach Proton. Check the connection and try again.")
             End Try
         End Function

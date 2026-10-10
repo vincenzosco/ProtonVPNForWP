@@ -25,6 +25,32 @@ Anything in the app that looks like status is status: the dashboard reports the
 network you are on and a TCP reachability probe to the chosen server. Neither is
 a claim that a tunnel is up.
 
+## Proton's API and Windows Phone 8.1's TLS
+
+**Sign-in and the live server list cannot work from this platform any more.**
+Proton's API edge accepts, at TLS 1.2, only `ECDHE_RSA_WITH_AES_256_GCM_SHA384`,
+`ECDHE_RSA_WITH_AES_128_GCM_SHA256` and `ECDHE_RSA_WITH_CHACHA20_POLY1305` (measured
+on 2026-10-10: every other suite, including all CBC ones, is refused with a
+handshake alert). Windows 8.1 and Windows Phone 8.1 offer no ECDHE+AES-GCM suite
+for an RSA server certificate -- per [TLS Cipher Suites in Windows
+8.1](https://learn.microsoft.com/en-us/windows/win32/secauthn/tls-cipher-suites-in-windows-8-1)
+the only ECDHE-GCM suites it has are ECDSA ones -- and Proton presents an RSA
+certificate. The intersection is empty, so the handshake is refused before a
+single request is sent.
+
+That is why the app reports "Could not reach Proton" even on a working network.
+The measured chain, from the 8.1 emulator's own log: DNS resolves, TCP to
+`account.proton.me:443` connects in ~80 ms, TLS 1.2 to a host that still offers
+ECDHE+CBC handshakes fine, and the same handshake to Proton fails with
+`SEC_E_ILLEGAL_MESSAGE` (0x80090326). Nothing in this app can widen the suite set:
+Windows Phone 8.1 exposes no API for cipher suites, and Schannel's list is an
+operating-system property.
+
+What still works: the bundled offline catalogue (64 logical servers), the server
+browser, the IKEv2/OpenVPN profile values and the OpenVPN export. Only the
+account-bound paths -- `Sign in`, the live catalogue refresh and
+`/vpn/credentials` -- are gone.
+
 ## What it does today
 
 | Screen | Purpose |
