@@ -14,6 +14,11 @@ Module Program
 
     Sub Main(args As String())
         Try
+            If args.Length >= 6 AndAlso args(0) = "rsa" Then
+                RunRsa(args)
+                Environment.Exit(0)
+            End If
+
             Console.WriteLine("sha256_empty=" & CryptoBytes.ToHex(Sha256.Hash(New Byte() {})))
             Console.WriteLine("sha256_abc=" & CryptoBytes.ToHex(Sha256.Hash(System.Text.Encoding.ASCII.GetBytes("abc"))))
 
@@ -59,6 +64,25 @@ Module Program
             Console.Error.WriteLine("HARNESS FAILURE: " & ex.GetType().Name & ": " & ex.Message)
             Environment.Exit(1)
         End Try
+    End Sub
+
+    ' rsa <modulusHex> <exponentHex> <messageHex> <pssSignatureHex> <pkcs1SignatureHex>
+    Sub RunRsa(args As String())
+        Dim modulus As Byte() = CryptoBytes.FromHex(args(1))
+        Dim exponent As Byte() = CryptoBytes.FromHex(args(2))
+        Dim message As Byte() = CryptoBytes.FromHex(args(3))
+        Dim pss As Byte() = CryptoBytes.FromHex(args(4))
+        Dim pkcs1 As Byte() = CryptoBytes.FromHex(args(5))
+
+        Console.WriteLine("pss_ok=" & If(RsaVerify.VerifyPssSha256(modulus, exponent, message, pss), "1", "0"))
+        Console.WriteLine("pkcs1_ok=" & If(RsaVerify.VerifyPkcs1Sha256(modulus, exponent, message, pkcs1), "1", "0"))
+
+        Dim tampered As Byte() = CType(pss.Clone(), Byte())
+        tampered(tampered.Length - 1) = CByte(tampered(tampered.Length - 1) Xor 1)
+        Console.WriteLine("pss_reject_flip=" & If(RsaVerify.VerifyPssSha256(modulus, exponent, message, tampered), "0", "1"))
+
+        Dim wrongMessage As Byte() = System.Text.Encoding.ASCII.GetBytes("another-message")
+        Console.WriteLine("pkcs1_reject_msg=" & If(RsaVerify.VerifyPkcs1Sha256(modulus, exponent, wrongMessage, pkcs1), "0", "1"))
     End Sub
 
 End Module

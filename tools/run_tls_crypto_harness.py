@@ -24,7 +24,7 @@ APP_SERVICES = HERE.parent / "Proton VPN WP" / "Proton VPN WP" / "Services"
 OUT = HERE / "vb_tls_harness" / "out"
 
 # Grows as the crypto primitives are added.
-SOURCE_FILES = ["CryptoBytes.vb", "Sha256.vb", "Hmac.vb", "Hkdf.vb", "X25519.vb", "Aes.vb", "Gcm.vb"]
+SOURCE_FILES = ["CryptoBytes.vb", "Sha256.vb", "Hmac.vb", "Hkdf.vb", "X25519.vb", "Aes.vb", "Gcm.vb", "RsaVerify.vb"]
 
 
 def find_vbc() -> str:
@@ -85,6 +85,28 @@ def expected() -> dict[str, str]:
     }
 
 
+def parse(stdout: str) -> dict[str, str]:
+    got = {}
+    for line in stdout.splitlines():
+        if "=" in line:
+            k, v = line.split("=", 1)
+            got[k.strip()] = v.strip()
+    return got
+
+
+def rsa_vectors() -> list[str]:
+    """A fresh RSA key and signatures from pyca/cryptography, or skip."""
+    from cryptography.hazmat.primitives import hashes
+    from cryptography.hazmat.primitives.asymmetric import padding, rsa
+
+    key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+    message = b"rsa-test-message"
+    modulus = key.public_key().public_numbers().n.to_bytes(256, "big")
+    pss = key.sign(message, padding.PSS(mgf=padding.MGF1(hashes.SHA256()), salt_length=32), hashes.SHA256())
+    pkcs1 = key.sign(message, padding.PKCS1v15(), hashes.SHA256())
+    return ["rsa", modulus.hex(), "010001", message.hex(), pss.hex(), pkcs1.hex()]
+
+
 def main() -> int:
     exe = build()
     proc = subprocess.run([exe], capture_output=True, text=True)
@@ -93,12 +115,7 @@ def main() -> int:
         print(proc.stderr)
         raise SystemExit(f"harness exited {proc.returncode}")
 
-    got = {}
-    for line in proc.stdout.splitlines():
-        if "=" in line:
-            k, v = line.split("=", 1)
-            got[k.strip()] = v.strip()
-
+    got = parse(proc.stdout)
     ok = True
     for key, want in expected().items():
         have = got.get(key)
@@ -108,6 +125,24 @@ def main() -> int:
             print(f"         got  {have}")
             print(f"         want {want}")
         ok = ok and match
+
+    try:
+        rsa_proc = subprocess.run([exe, *rsa_vectors()], capture_output=True, text=True)
+    except ImportError as exc:
+        print(f"  [SKIP] RSA verification: pyca/cryptography unavailable ({exc})")
+        ok = False
+    else:
+        if rsa_proc.returncode != 0:
+            print(rsa_proc.stdout)
+            print(rsa_proc.stderr)
+            raise SystemExit(f"rsa harness exited {rsa_proc.returncode}")
+        rsa_got = parse(rsa_proc.stdout)
+        for key in ("pss_ok", "pkcs1_ok", "pss_reject_flip", "pkcs1_reject_msg"):
+            match = rsa_got.get(key) == "1"
+            print(f"  [{'PASS' if match else 'FAIL'}] {key}")
+            if not match:
+                print(f"         got  {rsa_got.get(key)}")
+            ok = ok and match
 
     print("TLS crypto harness vs Python reference:", "OK" if ok else "FAILED")
     return 0 if ok else 1

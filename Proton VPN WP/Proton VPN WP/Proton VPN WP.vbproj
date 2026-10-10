@@ -121,6 +121,7 @@
     <Compile Include="Services\ProtonApiClient.vb" />
     <Compile Include="Services\ProtonAuthService.vb" />
     <Compile Include="Services\RandomSource.vb" />
+    <Compile Include="Services\RsaVerify.vb" />
     <Compile Include="Services\ServerCatalog.vb" />
     <Compile Include="Services\SettingsStore.vb" />
     <Compile Include="Services\Sha256.vb" />
