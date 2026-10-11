@@ -25,6 +25,14 @@ a typo in a comment:
 Writing a plan and then not executing it is a defect. So is executing without
 one. This mirrors `AGENTS.md`; that file is the authority if they disagree.
 
+## Commits: an agent commits and pushes, with no AI attribution
+
+An agent commits and pushes its own finished work (`git add`, `git commit`,
+`git push`) rather than handing the commands to the maintainer. It never appends
+`Co-Authored-By: <assistant>`, a `🤖 Generated with ...` footer, or any other AI
+marker to a commit message or a PR description: the message is an ordinary one,
+subject in the imperative and a body saying why. See `AGENTS.md`.
+
 ## Verify, never assume
 
 Run all three, and paste real output. A green build alone proves nothing about

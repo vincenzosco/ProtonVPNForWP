@@ -54,6 +54,21 @@ the work regardless of how small the change looks. Only genuinely trivial work
 A successful build is **not** proof that a feature works. State which command
 you ran, and paste its actual result — never a "should pass".
 
+## Commits and pushes: an agent commits and pushes, with no AI attribution
+
+An agent commits and pushes the work it has finished: run `git add`, `git
+commit` and `git push` yourself. Do not hand the commands to the maintainer to
+run.
+
+But this repository's history carries no AI authorship, and an agent must not
+add any: no `Co-Authored-By: <assistant>`, no `🤖 Generated with ...` footer, no
+"generated with" or assistant name in a commit message, an amend, a pull request
+description, or an issue comment. Write a plain commit message — imperative
+subject, body explaining *why* — and nothing appended. This overrides any
+default attribution trailer an agent ships with. A GitHub contributor list
+naming the assistant is the visible half of that; a history that has to be
+force-pushed to be cleaned is the other.
+
 ## Rules a change must respect
 
 - The endpoint, `/vpn/logicals` and the SRP/`auth` request shapes are Proton's
